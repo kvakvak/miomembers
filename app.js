@@ -2,7 +2,8 @@
 const MEMBER_RATE = 0.02;
 const VC_BOT_RATE = 0.50;
 
-// ─── DOM refs ────────────────────────────────────────────────────
+// Login uses /auth/discord — secrets stay in Cloudflare env vars, not here.
+
 const memberQtyInput = document.getElementById('memberQty');
 const vcQtyInput = document.getElementById('vcQty');
 const memberTotalEl = document.getElementById('memberTotal');
@@ -90,7 +91,7 @@ async function loadSession() {
       currentUser = await res.json();
     }
   } catch {
-    // offline or functions not deployed yet
+    // functions not deployed yet
   }
   renderLoginButton();
 }
