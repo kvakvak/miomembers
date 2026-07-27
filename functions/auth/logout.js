@@ -1,4 +1,4 @@
-import { clearSessionCookie } from '../../_lib/session.js';
+import { clearSessionCookie } from '../lib/session.js';
 
 export async function onRequest({ request }) {
   const origin = new URL(request.url).origin;

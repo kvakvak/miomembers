@@ -1,4 +1,4 @@
-import { signSession, getRedirectUri } from '../../_lib/session.js';
+import { signSession, getRedirectUri } from '../../lib/session.js';
 
 export async function onRequest({ env, request }) {
   const url = new URL(request.url);

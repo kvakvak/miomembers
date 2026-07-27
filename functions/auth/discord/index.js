@@ -1,4 +1,4 @@
-import { getRedirectUri } from '../../_lib/session.js';
+import { getRedirectUri } from '../../lib/session.js';
 
 export async function onRequest({ env, request }) {
   const clientId = env.DISCORD_CLIENT_ID;

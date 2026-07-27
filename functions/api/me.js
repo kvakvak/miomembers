@@ -1,4 +1,4 @@
-import { verifySession } from '../_lib/session.js';
+import { verifySession } from '../lib/session.js';
 
 export async function onRequest({ env, request }) {
   const cookie = request.headers.get('Cookie');

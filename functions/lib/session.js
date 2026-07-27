@@ -1,8 +1,11 @@
 const COOKIE_NAME = 'miomembers_session';
-const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+const MAX_AGE = 60 * 60 * 24 * 7;
 
 function toBase64Url(bytes) {
-  const bin = String.fromCharCode(...bytes);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) {
+    bin += String.fromCharCode(bytes[i]);
+  }
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
@@ -39,7 +42,7 @@ export async function signSession(user, secret) {
 }
 
 export async function verifySession(cookieHeader, secret) {
-  if (!cookieHeader) return null;
+  if (!cookieHeader || !secret) return null;
   const match = cookieHeader.match(new RegExp(`${COOKIE_NAME}=([^;]+)`));
   if (!match) return null;
 
