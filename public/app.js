@@ -1,22 +1,27 @@
-// ─── Pricing constants ───────────────────────────────────────────
 const MEMBER_RATE = 0.03;
 const VC_BOT_RATE = 0.50;
-
-// Login uses /auth/discord — secrets stay in Cloudflare env vars, not here.
 
 const memberQtyInput = document.getElementById('memberQty');
 const vcQtyInput = document.getElementById('vcQty');
 const memberTotalEl = document.getElementById('memberTotal');
 const vcTotalEl = document.getElementById('vcTotal');
+const serverInviteInput = document.getElementById('serverInvite');
 const calcTabs = document.querySelectorAll('.calc-tab');
 const calcMembers = document.getElementById('calcMembers');
 const calcVc = document.getElementById('calcVc');
 const loginBtn = document.getElementById('loginBtn');
 const checkoutBtn = document.getElementById('checkoutBtn');
 const toast = document.getElementById('toast');
+const checkoutOverlay = document.getElementById('checkoutOverlay');
+const checkoutClose = document.getElementById('checkoutClose');
+const checkoutDone = document.getElementById('checkoutDone');
+const payTabs = document.querySelectorAll('.pay-tab');
+const payEthPanel = document.getElementById('payEth');
+const payBtcPanel = document.getElementById('payBtc');
 
 let activeTab = 'members';
 let currentUser = null;
+let currentOrder = null;
 
 function formatUSD(amount) {
   return `$${amount.toFixed(2)}`;
@@ -73,7 +78,7 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.remove('hidden');
   clearTimeout(showToast._timer);
-  showToast._timer = setTimeout(() => toast.classList.add('hidden'), 3500);
+  showToast._timer = setTimeout(() => toast.classList.add('hidden'), 4500);
 }
 
 function renderLoginButton() {
@@ -112,12 +117,60 @@ async function loadSession() {
   renderLoginButton();
 }
 
-checkoutBtn.addEventListener('click', () => {
+function openCheckout(order) {
+  currentOrder = order;
+  document.getElementById('checkoutOrderId').textContent = order.id;
+  document.getElementById('checkoutSummary').innerHTML = `
+    <div><span>Product</span><strong>${order.qty} x ${order.productLabel}</strong></div>
+    <div><span>Total</span><strong>${formatUSD(order.totalUsd)}</strong></div>
+    <div><span>Server</span><strong>${order.invite}</strong></div>
+  `;
+  document.getElementById('payEthAmount').textContent = `${order.payment.eth.amount} ETH`;
+  document.getElementById('payEthAddress').textContent = order.payment.eth.address;
+  document.getElementById('payBtcAmount').textContent = `${order.payment.btc.amount} BTC`;
+  document.getElementById('payBtcAddress').textContent = order.payment.btc.address;
+  checkoutOverlay.classList.remove('hidden');
+  checkoutOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeCheckout() {
+  checkoutOverlay.classList.add('hidden');
+  checkoutOverlay.setAttribute('aria-hidden', 'true');
+  currentOrder = null;
+}
+
+payTabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    payTabs.forEach((t) => t.classList.toggle('active', t === tab));
+    const isEth = tab.dataset.currency === 'eth';
+    payEthPanel.classList.toggle('hidden', !isEth);
+    payBtcPanel.classList.toggle('hidden', isEth);
+  });
+});
+
+document.querySelectorAll('.copy-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const el = document.getElementById(btn.dataset.copy);
+    navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied!'));
+  });
+});
+
+checkoutClose.addEventListener('click', closeCheckout);
+checkoutOverlay.addEventListener('click', (e) => {
+  if (e.target === checkoutOverlay) closeCheckout();
+});
+checkoutDone.addEventListener('click', () => {
+  showToast(`Order ${currentOrder?.id} submitted. We will confirm after payment.`);
+  closeCheckout();
+});
+
+checkoutBtn.addEventListener('click', async () => {
   if (!currentUser) {
     showToast('Please log in with Discord first.');
     window.location.href = '/auth/discord';
     return;
   }
+
   const isMembers = activeTab === 'members';
   let qty;
   if (isMembers) {
@@ -129,10 +182,40 @@ checkoutBtn.addEventListener('click', () => {
     }
   } else {
     qty = parseInt(vcQtyInput.value, 10);
+    if (!qty || qty < 1) {
+      showToast('Enter at least 1 VC bot.');
+      return;
+    }
   }
-  const total = isMembers ? qty * MEMBER_RATE : qty * VC_BOT_RATE;
-  const product = isMembers ? 'Discord Members' : 'VC AFK Bots';
-  showToast(`Order: ${qty} × ${product} = ${formatUSD(total)} — checkout coming soon!`);
+
+  const invite = serverInviteInput?.value?.trim() || '';
+  if (!invite) {
+    showToast('Enter your Discord server invite link.');
+    serverInviteInput?.focus();
+    return;
+  }
+
+  checkoutBtn.disabled = true;
+  checkoutBtn.textContent = 'Creating order...';
+
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product: activeTab, qty, invite }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data.error || 'Checkout failed.');
+      return;
+    }
+    openCheckout(data.order);
+  } catch {
+    showToast('Network error. Try again.');
+  } finally {
+    checkoutBtn.disabled = false;
+    checkoutBtn.textContent = 'Proceed to checkout';
+  }
 });
 
 const params = new URLSearchParams(window.location.search);

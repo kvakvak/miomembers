@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=9" />
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -155,8 +155,11 @@
             </div>
           </div>
 
+          <label for="serverInvite">Discord server invite</label>
+          <input type="url" id="serverInvite" placeholder="https://discord.gg/your-server" />
+
           <button class="btn btn-primary btn-full" id="checkoutBtn">Proceed to checkout</button>
-          <p class="calc-hint">You must be logged in with Discord to complete checkout.</p>
+          <p class="calc-hint">Pay with ETH or BTC. Log in with Discord first.</p>
         </div>
       </div>
     </section>
@@ -179,8 +182,8 @@
         </div>
         <div class="step">
           <div class="step-num">3</div>
-          <h3>Pay securely</h3>
-          <p>Complete checkout via Stripe or crypto (configure your gateway).</p>
+          <h3>Pay with crypto</h3>
+          <p>Send ETH or BTC to complete your order. Delivery starts after confirmation.</p>
         </div>
         <div class="step">
           <div class="step-num">4</div>
@@ -203,6 +206,40 @@
   </footer>
 
   <div class="toast hidden" id="toast"></div>
-  <script src="app.js?v=8"></script>
+
+  <div class="checkout-overlay hidden" id="checkoutOverlay" aria-hidden="true">
+    <div class="checkout-modal" role="dialog" aria-labelledby="checkoutTitle">
+      <button class="checkout-close" id="checkoutClose" type="button" aria-label="Close">&times;</button>
+      <h2 id="checkoutTitle">Complete payment</h2>
+      <p class="checkout-order-id">Order <strong id="checkoutOrderId"></strong></p>
+      <div class="checkout-summary" id="checkoutSummary"></div>
+      <div class="pay-tabs">
+        <button class="pay-tab active" type="button" data-currency="eth">Ethereum</button>
+        <button class="pay-tab" type="button" data-currency="btc">Bitcoin</button>
+      </div>
+      <div class="pay-panel" id="payEth">
+        <p class="pay-label">Send exactly</p>
+        <div class="pay-amount" id="payEthAmount"></div>
+        <p class="pay-label">To this ETH address</p>
+        <div class="pay-address-row">
+          <code id="payEthAddress"></code>
+          <button class="btn btn-ghost btn-sm copy-btn" type="button" data-copy="payEthAddress">Copy</button>
+        </div>
+      </div>
+      <div class="pay-panel hidden" id="payBtc">
+        <p class="pay-label">Send exactly</p>
+        <div class="pay-amount" id="payBtcAmount"></div>
+        <p class="pay-label">To this BTC address</p>
+        <div class="pay-address-row">
+          <code id="payBtcAddress"></code>
+          <button class="btn btn-ghost btn-sm copy-btn" type="button" data-copy="payBtcAddress">Copy</button>
+        </div>
+      </div>
+      <p class="checkout-note">Send within 1 hour. Delivery starts after 1 confirmation.</p>
+      <button class="btn btn-primary btn-full" type="button" id="checkoutDone">I sent payment</button>
+    </div>
+  </div>
+
+  <script src="app.js?v=9"></script>
 </body>
 </html>
