@@ -876,21 +876,20 @@ body {
   color: var(--text);
 }
 
+.reviews-score-detail {
+  flex-shrink: 0;
+}
+
 .reviews-star-row {
-  display: flex;
-  gap: 0.15rem;
-}
-
-.reviews-star-row svg {
-  width: 20px;
-  height: 20px;
+  display: inline-block;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  line-height: 1;
   color: #facc15;
-  filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.35));
 }
 
-.reviews-star-row svg.star-dim {
-  color: rgba(255, 255, 255, 0.12);
-  filter: none;
+.reviews-star-row .star-half {
+  opacity: 0.25;
 }
 
 .reviews-bars {
