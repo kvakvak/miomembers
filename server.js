@@ -22,7 +22,11 @@ const {
 // In-memory sessions (use Redis/DB in production)
 const sessions = new Map();
 
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static site from repo root (index.html, styles.css, app.js)
+app.use(express.static(path.join(__dirname), {
+  index: 'index.html',
+  extensions: ['html'],
+}));
 
 // ─── Step 1: Redirect user to Discord ────────────────────────────
 app.get('/auth/discord', (_req, res) => {
