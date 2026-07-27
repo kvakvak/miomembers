@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -19,7 +19,6 @@
       <a href="#" class="logo">MioMembers</a>
       <ul class="nav-links">
         <li><a href="#products">Products</a></li>
-        <li><a href="#pricing">Pricing</a></li>
         <li><a href="#how-it-works">How it works</a></li>
       </ul>
       <button class="btn btn-discord" id="loginBtn">
@@ -41,7 +40,7 @@
       </p>
       <div class="hero-actions">
         <a href="#order" class="btn btn-primary">Start an order</a>
-        <a href="#pricing" class="btn btn-ghost">View pricing</a>
+        <a href="#products" class="btn btn-ghost">See products</a>
       </div>
       <div class="hero-stats">
         <div class="stat">
@@ -107,32 +106,6 @@
           </ul>
           <a href="#order" class="btn btn-primary" data-product="vc">Get VC bots</a>
         </article>
-      </div>
-    </section>
-
-    <section id="pricing" class="section section-alt">
-      <div class="container">
-        <div class="section-header">
-          <h2>Simple pricing</h2>
-          <p>Pay only for what you need. Scale up or down anytime.</p>
-        </div>
-        <div class="pricing-table">
-          <div class="pricing-row header-row">
-            <span>Product</span>
-            <span>Rate</span>
-            <span>Example</span>
-          </div>
-          <div class="pricing-row">
-            <span class="pricing-name">Discord Members</span>
-            <span class="pricing-rate">$0.03 / member</span>
-            <span class="pricing-example">1,000 members = <strong>$30.00</strong></span>
-          </div>
-          <div class="pricing-row">
-            <span class="pricing-name">VC AFK Bot</span>
-            <span class="pricing-rate">$0.50 / bot / month</span>
-            <span class="pricing-example">5 bots = <strong>$2.50/mo</strong></span>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -216,129 +189,20 @@
         </div>
       </div>
     </section>
-
-    <section id="reviews" class="reviews">
-      <div class="container">
-        <div class="reviews-layout">
-          <aside class="reviews-panel">
-            <p class="reviews-kicker">Social proof</p>
-            <h2 class="reviews-title">What customers say</h2>
-
-            <div class="reviews-score-block">
-              <span class="reviews-big-score">4.9</span>
-              <div class="reviews-score-detail">
-                <div class="reviews-star-row" aria-label="4.9 out of 5 stars">★★★★<span class="star-half">★</span></div>
-                <p>Based on <strong>214</strong> orders</p>
-              </div>
-            </div>
-
-            <div class="reviews-bars">
-              <div class="reviews-bar"><span>5</span><div class="bar-track"><div class="bar-fill" style="width: 89%"></div></div></div>
-              <div class="reviews-bar"><span>4</span><div class="bar-track"><div class="bar-fill" style="width: 8%"></div></div></div>
-              <div class="reviews-bar"><span>3</span><div class="bar-track"><div class="bar-fill" style="width: 2%"></div></div></div>
-              <div class="reviews-bar"><span>2</span><div class="bar-track"><div class="bar-fill" style="width: 1%"></div></div></div>
-              <div class="reviews-bar"><span>1</span><div class="bar-track"><div class="bar-fill" style="width: 0%"></div></div></div>
-            </div>
-
-            <div class="reviews-stats">
-              <div class="reviews-stat">
-                <span class="reviews-stat-num">1.2M+</span>
-                <span class="reviews-stat-label">Members delivered</span>
-              </div>
-              <div class="reviews-stat">
-                <span class="reviews-stat-num">&lt;1hr</span>
-                <span class="reviews-stat-label">Avg. start time</span>
-              </div>
-            </div>
-          </aside>
-
-          <div class="reviews-feed">
-            <article class="review-item accent-cyan">
-              <header class="review-item-head">
-                <div class="review-user">
-                  <div class="review-pfp">K</div>
-                  <div>
-                    <strong>Kai</strong>
-                    <span>Discord Members · 2,000 ordered</span>
-                  </div>
-                </div>
-                <time datetime="2026-07-10">Jul 10, 2026</time>
-              </header>
-              <p>Members started arriving within the hour. Dashboard is clean, delivery was gradual like promised. Exactly what I needed to launch my gaming community.</p>
-            </article>
-
-            <article class="review-item accent-purple">
-              <header class="review-item-head">
-                <div class="review-user">
-                  <div class="review-pfp">R</div>
-                  <div>
-                    <strong>Riley</strong>
-                    <span>VC AFK Bots · 5 bots active</span>
-                  </div>
-                </div>
-                <time datetime="2026-06-22">Jun 22, 2026</time>
-              </header>
-              <p>Bots have been in our lounge channel for three months without dropping. Setup after checkout took under five minutes. Best VC bot service I've used.</p>
-            </article>
-
-            <article class="review-item accent-pink">
-              <header class="review-item-head">
-                <div class="review-user">
-                  <div class="review-pfp">M</div>
-                  <div>
-                    <strong>Morgan</strong>
-                    <span>Discord Members · 500 ordered</span>
-                  </div>
-                </div>
-                <time datetime="2026-07-18">Jul 18, 2026</time>
-              </header>
-              <p>Fair pricing, Discord login made checkout dead simple. Had a question about my invite link and got a reply same day. Already planning my next order.</p>
-            </article>
-
-            <article class="review-item accent-blue">
-              <header class="review-item-head">
-                <div class="review-user">
-                  <div class="review-pfp">J</div>
-                  <div>
-                    <strong>Jade</strong>
-                    <span>Discord Members · 10,000 ordered</span>
-                  </div>
-                </div>
-                <time datetime="2026-05-30">May 30, 2026</time>
-              </header>
-              <p>Bulk order of 10k handled smoothly. Gradual delivery kept things looking natural. Server went from 200 to 10k over two weeks — no bans, no issues.</p>
-            </article>
-          </div>
-        </div>
-      </div>
-
-      <div class="reviews-ticker" aria-hidden="true">
-        <div class="reviews-ticker-track">
-          <span>★★★★★ Fast delivery — Kai</span>
-          <span>★★★★★ 3 months uptime — Riley</span>
-          <span>★★★★★ Same-day support — Morgan</span>
-          <span>★★★★★ 10k members, zero issues — Jade</span>
-          <span>★★★★★ Fast delivery — Kai</span>
-          <span>★★★★★ 3 months uptime — Riley</span>
-          <span>★★★★★ Same-day support — Morgan</span>
-          <span>★★★★★ 10k members, zero issues — Jade</span>
-        </div>
-      </div>
-    </section>
   </main>
 
   <footer class="footer">
     <div class="container footer-inner">
       <p class="footer-copy">&copy; 2026 MioMembers. All rights reserved.</p>
       <div class="footer-links">
-        <a href="#pricing">Pricing</a>
-        <a href="#reviews">Reviews</a>
+        <a href="#products">Products</a>
+        <a href="#order">Order</a>
         <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">Developer Portal</a>
       </div>
     </div>
   </footer>
 
   <div class="toast hidden" id="toast"></div>
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>
