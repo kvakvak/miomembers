@@ -24,7 +24,6 @@
         <li><a href="#products">Products</a></li>
         <li><a href="#pricing">Pricing</a></li>
         <li><a href="#how-it-works">How it works</a></li>
-        <li><a href="#discord-login">Login setup</a></li>
       </ul>
       <button class="btn btn-discord" id="loginBtn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -49,7 +48,7 @@
       </div>
       <div class="hero-stats">
         <div class="stat">
-          <span class="stat-value">$0.02</span>
+          <span class="stat-value">$0.03</span>
           <span class="stat-label">per member</span>
         </div>
         <div class="stat-divider"></div>
@@ -81,7 +80,7 @@
             </svg>
           </div>
           <h3>Discord Members</h3>
-          <p class="product-price">$0.02 <span>/ member</span></p>
+          <p class="product-price">$0.03 <span>/ member</span></p>
           <ul class="feature-list">
             <li>Bulk orders from 100 to 100,000+</li>
             <li>Gradual delivery options</li>
@@ -128,8 +127,8 @@
           </div>
           <div class="pricing-row">
             <span class="pricing-name">Discord Members</span>
-            <span class="pricing-rate">$0.02 / member</span>
-            <span class="pricing-example">1,000 members = <strong>$20.00</strong></span>
+            <span class="pricing-rate">$0.03 / member</span>
+            <span class="pricing-example">1,000 members = <strong>$30.00</strong></span>
           </div>
           <div class="pricing-row">
             <span class="pricing-name">VC AFK Bot</span>
@@ -162,14 +161,14 @@
 
           <div class="calc-body" id="calcMembers">
             <label for="memberQty">Number of members</label>
-            <input type="number" id="memberQty" min="100" step="100" value="1000" />
+            <input type="text" id="memberQty" inputmode="numeric" placeholder="100 minimum" value="1000" />
             <div class="calc-breakdown">
               <span>Rate</span>
-              <span>$0.02 / member</span>
+              <span>$0.03 / member</span>
             </div>
             <div class="calc-total">
               <span>Total</span>
-              <span id="memberTotal">$20.00</span>
+              <span id="memberTotal">$30.00</span>
             </div>
           </div>
 
@@ -221,122 +220,51 @@
       </div>
     </section>
 
-    <section id="discord-login" class="section section-docs">
+    <section id="reviews" class="section section-alt">
       <div class="container">
         <div class="section-header">
-          <h2>Discord login setup guide</h2>
-          <p>Follow these steps to add "Login with Discord" to MioMembers using OAuth2.</p>
-        </div>
-
-        <div class="docs-grid">
-          <article class="doc-card">
-            <h3>Step 1 — Create a Discord Application</h3>
-            <ol>
-              <li>Go to the <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">Discord Developer Portal</a>.</li>
-              <li>Click <strong>New Application</strong> and name it <code>MioMembers</code>.</li>
-              <li>Open <strong>OAuth2 → General</strong> and copy your <strong>Client ID</strong> and <strong>Client Secret</strong>.</li>
-              <li>Add a redirect URL: <code>http://localhost:3000/auth/discord/callback</code> (use your production domain in prod).</li>
-            </ol>
-          </article>
-
-          <article class="doc-card">
-            <h3>Step 2 — Configure OAuth2 scopes</h3>
-            <p>For login only, request these scopes:</p>
-            <ul>
-              <li><code>identify</code> — username, avatar, user ID</li>
-              <li><code>email</code> — optional, for receipts</li>
-              <li><code>guilds</code> — optional, list servers the user manages</li>
-            </ul>
-            <p class="doc-url">Authorization URL pattern:</p>
-            <pre><code>https://discord.com/api/oauth2/authorize
-  ?client_id=YOUR_CLIENT_ID
-  &amp;redirect_uri=YOUR_REDIRECT_URI
-  &amp;response_type=code
-  &amp;scope=identify%20email</code></pre>
-          </article>
-
-          <article class="doc-card">
-            <h3>Step 3 — Backend token exchange (Node.js example)</h3>
-            <p>After Discord redirects with a <code>?code=...</code>, exchange it server-side:</p>
-            <pre><code>// POST https://discord.com/api/oauth2/token
-const params = new URLSearchParams({
-  client_id: process.env.DISCORD_CLIENT_ID,
-  client_secret: process.env.DISCORD_CLIENT_SECRET,
-  grant_type: 'authorization_code',
-  code: req.query.code,
-  redirect_uri: process.env.DISCORD_REDIRECT_URI,
-});
-
-const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  body: params,
-});
-const { access_token } = await tokenRes.json();
-
-// Get user profile
-const userRes = await fetch('https://discord.com/api/users/@me', {
-  headers: { Authorization: `Bearer ${access_token}` },
-});
-const user = await userRes.json();
-// user.id, user.username, user.avatar</code></pre>
-          </article>
-
-          <article class="doc-card">
-            <h3>Step 4 — Create a session</h3>
-            <ol>
-              <li>Store <code>user.id</code> in your database (upsert on each login).</li>
-              <li>Issue a signed session cookie (JWT or encrypted session ID).</li>
-              <li>Never expose the Client Secret in frontend JavaScript.</li>
-              <li>Use HTTPS in production and set <code>SameSite=Lax</code> on cookies.</li>
-            </ol>
-          </article>
-
-          <article class="doc-card">
-            <h3>Step 5 — Bot authorization (for VC bots &amp; delivery)</h3>
-            <p>OAuth login identifies the user. To add bots to their server, use a separate bot invite:</p>
-            <ol>
-              <li>In the Developer Portal, go to <strong>Bot</strong> → create bot → copy token (server-side only).</li>
-              <li>Enable <strong>Server Members Intent</strong> if needed for member delivery.</li>
-              <li>Generate invite URL with permissions:</li>
-            </ol>
-            <pre><code>https://discord.com/api/oauth2/authorize
-  ?client_id=YOUR_CLIENT_ID
-  &amp;permissions=3148800
-  &amp;scope=bot%20applications.commands</code></pre>
-            <p>Permissions <code>3148800</code> = Connect, Speak, View Channels. Adjust as needed.</p>
-          </article>
-
-          <article class="doc-card">
-            <h3>Step 6 — Wire the login button</h3>
-            <p>Update <code>app.js</code> with your Client ID:</p>
-            <pre><code>const DISCORD_CLIENT_ID = 'YOUR_CLIENT_ID';
-const REDIRECT_URI = encodeURIComponent(
-  'http://localhost:3000/auth/discord/callback'
-);
-const loginUrl =
-  `https://discord.com/api/oauth2/authorize` +
-  `?client_id=${DISCORD_CLIENT_ID}` +
-  `&amp;redirect_uri=${REDIRECT_URI}` +
-  `&amp;response_type=code` +
-  `&amp;scope=identify%20email`;
-
-document.getElementById('loginBtn')
-  .addEventListener('click', () => {
-    window.location.href = loginUrl;
-  });</code></pre>
-          </article>
-        </div>
-
-        <div class="docs-stack">
-          <h3>Recommended stack</h3>
-          <div class="stack-tags">
-            <span>Node.js + Express</span>
-            <span>discord.js (bot)</span>
-            <span>PostgreSQL / SQLite</span>
-            <span>Stripe (payments)</span>
-            <span>Redis (sessions)</span>
+          <h2>Customer reviews</h2>
+          <p>See why server owners choose MioMembers.</p>
+          <div class="reviews-summary">
+            <span class="stars-lg" aria-hidden="true">★★★★★</span>
+            <span class="reviews-score">4.9</span>
+            <span class="reviews-count">Based on 200+ orders</span>
           </div>
+        </div>
+        <div class="reviews-grid">
+          <article class="review-card">
+            <div class="stars" aria-hidden="true">★★★★★</div>
+            <p>Ordered 2,000 members and they started arriving within the hour. Clean dashboard, no drama — exactly what I needed for my community launch.</p>
+            <div class="review-author">
+              <div class="review-avatar">K</div>
+              <div>
+                <strong>Kai</strong>
+                <span>Gaming server owner</span>
+              </div>
+            </div>
+          </article>
+          <article class="review-card">
+            <div class="stars" aria-hidden="true">★★★★★</div>
+            <p>VC bots have been sitting in our lounge channel for three months straight. Uptime is solid and setup took less than five minutes after checkout.</p>
+            <div class="review-author">
+              <div class="review-avatar">R</div>
+              <div>
+                <strong>Riley</strong>
+                <span>Community manager</span>
+              </div>
+            </div>
+          </article>
+          <article class="review-card">
+            <div class="stars" aria-hidden="true">★★★★★</div>
+            <p>Fair pricing at $0.03 per member and Discord login made ordering painless. Support answered my invite-link question same day. Will reorder.</p>
+            <div class="review-author">
+              <div class="review-avatar">M</div>
+              <div>
+                <strong>Morgan</strong>
+                <span>Server admin</span>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -351,13 +279,13 @@ document.getElementById('loginBtn')
       <p class="footer-copy">&copy; 2026 MioMembers. All rights reserved.</p>
       <div class="footer-links">
         <a href="#pricing">Pricing</a>
-        <a href="#discord-login">Discord login guide</a>
+        <a href="#reviews">Reviews</a>
         <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">Developer Portal</a>
       </div>
     </div>
   </footer>
 
   <div class="toast hidden" id="toast"></div>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 // ─── Pricing constants ───────────────────────────────────────────
-const MEMBER_RATE = 0.02;
+const MEMBER_RATE = 0.03;
 const VC_BOT_RATE = 0.50;
 
 // Login uses /auth/discord — secrets stay in Cloudflare env vars, not here.
@@ -23,14 +23,30 @@ function formatUSD(amount) {
 }
 
 function updateMemberTotal() {
-  const qty = Math.max(100, parseInt(memberQtyInput.value, 10) || 0);
-  memberQtyInput.value = qty;
+  const raw = memberQtyInput.value.trim();
+  if (raw === '') {
+    memberTotalEl.textContent = '$0.00';
+    return;
+  }
+  const qty = parseInt(raw, 10);
+  if (isNaN(qty) || qty < 0) {
+    memberTotalEl.textContent = '$0.00';
+    return;
+  }
   memberTotalEl.textContent = formatUSD(qty * MEMBER_RATE);
 }
 
 function updateVcTotal() {
-  const qty = Math.max(1, parseInt(vcQtyInput.value, 10) || 1);
-  vcQtyInput.value = qty;
+  const raw = vcQtyInput.value.trim();
+  if (raw === '') {
+    vcTotalEl.textContent = '$0.00';
+    return;
+  }
+  const qty = parseInt(raw, 10);
+  if (isNaN(qty) || qty < 0) {
+    vcTotalEl.textContent = '$0.00';
+    return;
+  }
   vcTotalEl.textContent = formatUSD(qty * VC_BOT_RATE);
 }
 
@@ -103,7 +119,17 @@ checkoutBtn.addEventListener('click', () => {
     return;
   }
   const isMembers = activeTab === 'members';
-  const qty = isMembers ? parseInt(memberQtyInput.value, 10) : parseInt(vcQtyInput.value, 10);
+  let qty;
+  if (isMembers) {
+    const raw = memberQtyInput.value.trim();
+    qty = parseInt(raw, 10);
+    if (!raw || isNaN(qty) || qty < 100) {
+      showToast('No — minimum order is 100 members.');
+      return;
+    }
+  } else {
+    qty = parseInt(vcQtyInput.value, 10);
+  }
   const total = isMembers ? qty * MEMBER_RATE : qty * VC_BOT_RATE;
   const product = isMembers ? 'Discord Members' : 'VC AFK Bots';
   showToast(`Order: ${qty} × ${product} = ${formatUSD(total)} — checkout coming soon!`);
