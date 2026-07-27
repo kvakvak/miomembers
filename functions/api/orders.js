@@ -42,7 +42,7 @@ export async function onRequest({ env, request }) {
   }
 
   try {
-    const prices = await fetchCryptoPrices();
+    const prices = await fetchCryptoPrices(env);
     const order = buildOrder({ user, product, qty: quantity, totalUsd, invite: inviteTrimmed, prices, env });
 
     if (env.ORDERS) {
