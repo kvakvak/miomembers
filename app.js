@@ -1,5 +1,6 @@
 const DISCORD_COMMUNITY_INVITE = 'https://discord.gg/Nw7P2zPvCV';
 const INVITE_PATTERN = /^https?:\/\/(discord\.(gg|com)\/|discordapp\.com\/invite\/)/i;
+const PRODUCTS_NEED_INVITE = new Set(['members', 'vc']);
 
 const PRODUCTS = {
   members: { rate: 0.03, min: 100, totalEl: 'memberTotal', inputId: 'memberQty', minMsg: 'No — minimum order is 100 members.' },
@@ -20,6 +21,7 @@ const payTabs = document.querySelectorAll('.pay-tab');
 const payEthPanel = document.getElementById('payEth');
 const payBtcPanel = document.getElementById('payBtc');
 const serverInviteInput = document.getElementById('serverInvite');
+const inviteCard = document.getElementById('inviteCard');
 const pasteInviteBtn = document.getElementById('pasteInviteBtn');
 
 let activeTab = 'members';
@@ -60,6 +62,9 @@ function switchTab(tabKey) {
   activeTab = tabKey;
   calcTabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === tabKey));
   calcPanels.forEach((panel) => panel.classList.toggle('hidden', panel.dataset.panel !== tabKey));
+  if (inviteCard) {
+    inviteCard.classList.toggle('hidden', !PRODUCTS_NEED_INVITE.has(tabKey));
+  }
 }
 
 calcTabs.forEach((tab) => {
@@ -128,10 +133,11 @@ function openCheckout(order) {
       <span>Product</span>
       <strong>${order.qty.toLocaleString()} × ${order.productLabel}</strong>
     </div>
+    ${order.invite ? `
     <div class="checkout-summary-item">
       <span>Server invite</span>
       <strong>${order.invite}</strong>
-    </div>
+    </div>` : ''}
     <div class="checkout-summary-item checkout-summary-total">
       <span>Total due</span>
       <strong>${formatUSD(order.totalUsd)}</strong>
@@ -236,11 +242,14 @@ checkoutBtn.addEventListener('click', async () => {
     }
   }
 
-  const invite = serverInviteInput?.value?.trim() || '';
-  if (!invite || !INVITE_PATTERN.test(invite)) {
-    showToast('Enter a valid Discord invite link (discord.gg/...).');
-    serverInviteInput?.focus();
-    return;
+  let invite = '';
+  if (PRODUCTS_NEED_INVITE.has(activeTab)) {
+    invite = serverInviteInput?.value?.trim() || '';
+    if (!invite || !INVITE_PATTERN.test(invite)) {
+      showToast('Enter a valid Discord invite link (discord.gg/...).');
+      serverInviteInput?.focus();
+      return;
+    }
   }
 
   checkoutBtn.disabled = true;
@@ -250,7 +259,7 @@ checkoutBtn.addEventListener('click', async () => {
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product: activeTab, qty, invite }),
+      body: JSON.stringify({ product: activeTab, qty, ...(invite && { invite }) }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -277,6 +286,7 @@ if (params.get('login') === 'success') {
 }
 
 Object.keys(PRODUCTS).forEach(updateProductTotal);
+switchTab(activeTab);
 
 document.querySelectorAll('[data-discord-invite]').forEach((link) => {
   link.href = DISCORD_COMMUNITY_INVITE;

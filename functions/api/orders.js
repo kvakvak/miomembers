@@ -40,7 +40,8 @@ export async function onRequest({ env, request }) {
   }
 
   const inviteTrimmed = (invite || '').trim();
-  if (!inviteTrimmed || !/^https?:\/\/(discord\.(gg|com)\/|discordapp\.com\/invite\/)/i.test(inviteTrimmed)) {
+  const needsInvite = product === 'members' || product === 'vc';
+  if (needsInvite && (!inviteTrimmed || !/^https?:\/\/(discord\.(gg|com)\/|discordapp\.com\/invite\/)/i.test(inviteTrimmed))) {
     return Response.json({ error: 'Valid Discord invite link required' }, { status: 400 });
   }
 
@@ -51,7 +52,7 @@ export async function onRequest({ env, request }) {
 
   try {
     const prices = await fetchCryptoPrices(env);
-    const order = buildOrder({ user, product, qty: quantity, totalUsd, invite: inviteTrimmed, prices, env });
+    const order = buildOrder({ user, product, qty: quantity, totalUsd, invite: inviteTrimmed || null, prices, env });
 
     if (env.ORDERS) {
       await env.ORDERS.put(order.id, JSON.stringify(order), { expirationTtl: 86400 });

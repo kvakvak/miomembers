@@ -110,7 +110,18 @@ function getSessionId(req) {
 app.get('/api/me', (req, res) => {
   const session = sessions.get(getSessionId(req));
   if (!session) return res.status(401).json({ error: 'Not logged in' });
-  res.json(session);
+
+  const avatarUrl = session.avatar
+    ? `https://cdn.discordapp.com/avatars/${session.discordId}/${session.avatar}.png?size=64`
+    : `https://cdn.discordapp.com/embed/avatars/${Number(session.discordId) % 5}.png`;
+
+  res.json({
+    loggedIn: true,
+    id: session.discordId,
+    username: session.username,
+    email: session.email,
+    avatarUrl,
+  });
 });
 
 app.listen(PORT, () => {

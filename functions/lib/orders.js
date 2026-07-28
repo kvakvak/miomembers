@@ -142,7 +142,7 @@ export async function notifyDiscord(order, env) {
           { name: 'User', value: `${order.username} (${order.discordId})`, inline: true },
           { name: 'Product', value: `${order.qty} x ${order.productLabel}`, inline: true },
           { name: 'Total', value: `$${order.totalUsd.toFixed(2)}`, inline: true },
-          { name: 'Invite', value: order.invite },
+          ...(order.invite ? [{ name: 'Invite', value: order.invite }] : []),
           { name: 'ETH', value: `${order.payment.eth.amount} ETH`, inline: true },
           { name: 'BTC', value: `${order.payment.btc.amount} BTC`, inline: true },
         ],
