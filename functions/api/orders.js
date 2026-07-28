@@ -1,5 +1,5 @@
 import { verifySession } from '../lib/session.js';
-import { calcTotal, fetchCryptoPrices, buildOrder, notifyDiscord } from '../lib/orders.js';
+import { calcTotal, fetchCryptoPrices, buildOrder, notifyDiscord, PRODUCT_MIN_QTY } from '../lib/orders.js';
 
 export async function onRequest({ env, request }) {
   if (request.method !== 'POST') {
@@ -19,7 +19,7 @@ export async function onRequest({ env, request }) {
   }
 
   const { product, qty } = body;
-  if (!['members', 'vc'].includes(product)) {
+  if (!['members', 'vc', 'spam', 'autoreply'].includes(product)) {
     return Response.json({ error: 'Invalid product' }, { status: 400 });
   }
 
@@ -27,8 +27,11 @@ export async function onRequest({ env, request }) {
   if (!quantity || quantity < 1) {
     return Response.json({ error: 'Invalid quantity' }, { status: 400 });
   }
-  if (product === 'members' && quantity < 100) {
-    return Response.json({ error: 'Minimum order is 100 members' }, { status: 400 });
+
+  const minQty = PRODUCT_MIN_QTY[product];
+  if (quantity < minQty) {
+    const unit = product === 'members' ? 'members' : product === 'spam' ? 'licenses' : product === 'autoreply' ? 'accounts' : 'items';
+    return Response.json({ error: `Minimum order is ${minQty} ${unit}` }, { status: 400 });
   }
 
   const totalUsd = calcTotal(product, quantity);

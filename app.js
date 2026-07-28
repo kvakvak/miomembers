@@ -1,13 +1,12 @@
-const MEMBER_RATE = 0.03;
-const VC_BOT_RATE = 0.50;
+const PRODUCTS = {
+  members: { rate: 0.03, min: 100, totalEl: 'memberTotal', inputId: 'memberQty', minMsg: 'No — minimum order is 100 members.' },
+  vc: { rate: 0.50, min: 1, totalEl: 'vcTotal', inputId: 'vcQty', minMsg: 'Enter at least 1 VC bot.' },
+  spam: { rate: 6.50, min: 1, totalEl: 'spamTotal', inputId: 'spamQty', minMsg: 'Enter at least 1 license.' },
+  autoreply: { rate: 4.00, min: 1, totalEl: 'autoreplyTotal', inputId: 'autoreplyQty', minMsg: 'Enter at least 1 auto-reply account.' },
+};
 
-const memberQtyInput = document.getElementById('memberQty');
-const vcQtyInput = document.getElementById('vcQty');
-const memberTotalEl = document.getElementById('memberTotal');
-const vcTotalEl = document.getElementById('vcTotal');
 const calcTabs = document.querySelectorAll('.calc-tab');
-const calcMembers = document.getElementById('calcMembers');
-const calcVc = document.getElementById('calcVc');
+const calcPanels = document.querySelectorAll('.calc-body');
 const loginBtn = document.getElementById('loginBtn');
 const checkoutBtn = document.getElementById('checkoutBtn');
 const toast = document.getElementById('toast');
@@ -26,52 +25,45 @@ function formatUSD(amount) {
   return `$${amount.toFixed(2)}`;
 }
 
-function updateMemberTotal() {
-  const raw = memberQtyInput.value.trim();
+function updateProductTotal(productKey) {
+  const product = PRODUCTS[productKey];
+  const input = document.getElementById(product.inputId);
+  const totalEl = document.getElementById(product.totalEl);
+  const raw = input.value.trim();
+
   if (raw === '') {
-    memberTotalEl.textContent = '$0.00';
+    totalEl.textContent = '$0.00';
     return;
   }
+
   const qty = parseInt(raw, 10);
   if (isNaN(qty) || qty < 0) {
-    memberTotalEl.textContent = '$0.00';
+    totalEl.textContent = '$0.00';
     return;
   }
-  memberTotalEl.textContent = formatUSD(qty * MEMBER_RATE);
+
+  totalEl.textContent = formatUSD(qty * product.rate);
 }
 
-function updateVcTotal() {
-  const raw = vcQtyInput.value.trim();
-  if (raw === '') {
-    vcTotalEl.textContent = '$0.00';
-    return;
-  }
-  const qty = parseInt(raw, 10);
-  if (isNaN(qty) || qty < 0) {
-    vcTotalEl.textContent = '$0.00';
-    return;
-  }
-  vcTotalEl.textContent = formatUSD(qty * VC_BOT_RATE);
+function switchTab(tabKey) {
+  activeTab = tabKey;
+  calcTabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === tabKey));
+  calcPanels.forEach((panel) => panel.classList.toggle('hidden', panel.dataset.panel !== tabKey));
 }
 
 calcTabs.forEach((tab) => {
-  tab.addEventListener('click', () => {
-    activeTab = tab.dataset.tab;
-    calcTabs.forEach((t) => t.classList.toggle('active', t === tab));
-    calcMembers.classList.toggle('hidden', activeTab !== 'members');
-    calcVc.classList.toggle('hidden', activeTab !== 'vc');
-  });
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
 });
 
 document.querySelectorAll('[data-product]').forEach((btn) => {
   btn.addEventListener('click', () => {
-    const tab = document.querySelector(`.calc-tab[data-tab="${btn.dataset.product}"]`);
-    if (tab) tab.click();
+    switchTab(btn.dataset.product);
   });
 });
 
-memberQtyInput.addEventListener('input', updateMemberTotal);
-vcQtyInput.addEventListener('input', updateVcTotal);
+Object.keys(PRODUCTS).forEach((key) => {
+  document.getElementById(PRODUCTS[key].inputId).addEventListener('input', () => updateProductTotal(key));
+});
 
 function showToast(message) {
   toast.textContent = message;
@@ -214,21 +206,13 @@ checkoutBtn.addEventListener('click', async () => {
     return;
   }
 
-  const isMembers = activeTab === 'members';
-  let qty;
-  if (isMembers) {
-    const raw = memberQtyInput.value.trim();
-    qty = parseInt(raw, 10);
-    if (!raw || isNaN(qty) || qty < 100) {
-      showToast('No — minimum order is 100 members.');
-      return;
-    }
-  } else {
-    qty = parseInt(vcQtyInput.value, 10);
-    if (!qty || qty < 1) {
-      showToast('Enter at least 1 VC bot.');
-      return;
-    }
+  const product = PRODUCTS[activeTab];
+  const raw = document.getElementById(product.inputId).value.trim();
+  const qty = parseInt(raw, 10);
+
+  if (!raw || isNaN(qty) || qty < product.min) {
+    showToast(product.minMsg);
+    return;
   }
 
   checkoutBtn.disabled = true;
@@ -264,6 +248,5 @@ if (params.get('login') === 'success') {
   window.history.replaceState({}, '', '/');
 }
 
-updateMemberTotal();
-updateVcTotal();
+Object.keys(PRODUCTS).forEach(updateProductTotal);
 loadSession();

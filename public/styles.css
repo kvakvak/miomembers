@@ -343,6 +343,16 @@ body {
   color: var(--discord);
 }
 
+.spam-icon {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.autoreply-icon {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--success);
+}
+
 .product-card h3 {
   font-size: 1.35rem;
   font-weight: 700;
@@ -471,21 +481,21 @@ body {
 }
 
 .calc-tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
   margin-bottom: 1.25rem;
 }
 
 .calc-tab {
-  flex: 1;
-  padding: 0.6rem;
+  padding: 0.65rem 0.5rem;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text-muted);
   font-family: inherit;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s;
 }

@@ -1,9 +1,27 @@
 const MEMBER_RATE = 0.03;
 const VC_BOT_RATE = 0.5;
+const SPAM_RATE = 6.5;
+const AUTOREPLY_RATE = 4.0;
+
+const PRODUCT_LABELS = {
+  members: 'Discord Members',
+  vc: 'VC AFK Bots',
+  spam: 'Discord Spam',
+  autoreply: 'Discord Auto-Reply',
+};
+
+export const PRODUCT_MIN_QTY = {
+  members: 100,
+  vc: 1,
+  spam: 1,
+  autoreply: 1,
+};
 
 export function calcTotal(product, qty) {
   if (product === 'members') return qty * MEMBER_RATE;
   if (product === 'vc') return qty * VC_BOT_RATE;
+  if (product === 'spam') return qty * SPAM_RATE;
+  if (product === 'autoreply') return qty * AUTOREPLY_RATE;
   return null;
 }
 
@@ -89,7 +107,7 @@ export function buildOrder({ user, product, qty, totalUsd, prices, env }) {
   return {
     id: makeOrderId(),
     product,
-    productLabel: product === 'members' ? 'Discord Members' : 'VC AFK Bots',
+    productLabel: PRODUCT_LABELS[product] || product,
     qty,
     totalUsd: +totalUsd.toFixed(2),
     discordId: user.id,
