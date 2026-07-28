@@ -1,5 +1,5 @@
 import { verifySession } from '../lib/session.js';
-import { calcTotal, fetchCryptoPrices, buildOrder, notifyDiscord, PRODUCT_MIN_QTY } from '../lib/orders.js';
+import { calcTotal, fetchCryptoPrices, buildOrder, notifyDiscord, PRODUCT_MIN_QTY, PRODUCT_MAX_QTY } from '../lib/orders.js';
 
 export async function onRequest({ env, request }) {
   if (request.method !== 'POST') {
@@ -32,6 +32,11 @@ export async function onRequest({ env, request }) {
   if (quantity < minQty) {
     const unit = product === 'members' ? 'members' : product === 'spam' ? 'licenses' : product === 'autoreply' ? 'accounts' : 'items';
     return Response.json({ error: `Minimum order is ${minQty} ${unit}` }, { status: 400 });
+  }
+
+  const maxQty = PRODUCT_MAX_QTY[product];
+  if (maxQty && quantity > maxQty) {
+    return Response.json({ error: 'Only 1 can be purchased per order' }, { status: 400 });
   }
 
   const totalUsd = calcTotal(product, quantity);

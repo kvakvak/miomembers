@@ -17,6 +17,11 @@ export const PRODUCT_MIN_QTY = {
   autoreply: 1,
 };
 
+export const PRODUCT_MAX_QTY = {
+  spam: 1,
+  autoreply: 1,
+};
+
 export function calcTotal(product, qty) {
   if (product === 'members') return qty * MEMBER_RATE;
   if (product === 'vc') return qty * VC_BOT_RATE;

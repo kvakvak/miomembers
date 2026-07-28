@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=12" />
+  <link rel="stylesheet" href="styles.css?v=13" />
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -65,8 +65,9 @@
         <h2>What we offer</h2>
         <p>Four products built for Discord server owners and communities.</p>
       </div>
-      <div class="product-grid">
-        <article class="product-card">
+      <div class="product-rows">
+        <div class="product-row">
+          <article class="product-card">
           <div class="product-icon members-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -105,9 +106,11 @@
             <li>99.9% uptime guarantee</li>
           </ul>
           <a href="#order" class="btn btn-primary" data-product="vc">Get VC bots</a>
-        </article>
+          </article>
+        </div>
 
-        <article class="product-card">
+        <div class="product-row">
+          <article class="product-card">
           <div class="product-icon spam-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -120,7 +123,7 @@
           <ul class="feature-list">
             <li>Mass DM or channel messaging</li>
             <li>Custom message templates</li>
-            <li>Targeted server lists</li>
+            <li>One license per purchase</li>
             <li>Delivery reports included</li>
           </ul>
           <a href="#order" class="btn btn-outline" data-product="spam">Order spam</a>
@@ -134,15 +137,16 @@
             </svg>
           </div>
           <h3>Discord Auto-Reply</h3>
-          <p class="product-price">$4.00 <span>/ account / month</span></p>
+          <p class="product-price">$4.00 <span>/ month</span></p>
           <ul class="feature-list">
             <li>Instant DM auto-responses</li>
             <li>Keyword triggers &amp; filters</li>
-            <li>Multiple accounts supported</li>
+            <li>One account per purchase</li>
             <li>Runs 24/7 in the background</li>
           </ul>
           <a href="#order" class="btn btn-outline" data-product="autoreply">Get auto-reply</a>
-        </article>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -159,19 +163,23 @@
               <strong>VC Bots:</strong> Billed monthly. Bot joins your server after payment.
             </div>
             <div class="note">
-              <strong>Discord Spam:</strong> $6.50/month. Access starts after payment.
+              <strong>Discord Spam:</strong> $6.50/month — one license per order.
             </div>
             <div class="note">
-              <strong>Auto-Reply:</strong> $4.00/month per account. Setup within 30 minutes.
+              <strong>Auto-Reply:</strong> $4.00/month — one account per order.
             </div>
           </div>
         </div>
         <div class="order-calculator">
-          <div class="calc-tabs">
-            <button class="calc-tab active" data-tab="members">Members</button>
-            <button class="calc-tab" data-tab="vc">VC Bots</button>
-            <button class="calc-tab" data-tab="spam">Spam</button>
-            <button class="calc-tab" data-tab="autoreply">Auto-Reply</button>
+          <div class="calc-tab-groups">
+            <div class="calc-tabs calc-tabs-pair">
+              <button class="calc-tab active" data-tab="members">Members</button>
+              <button class="calc-tab" data-tab="vc">VC Bots</button>
+            </div>
+            <div class="calc-tabs calc-tabs-pair">
+              <button class="calc-tab" data-tab="spam">Spam</button>
+              <button class="calc-tab" data-tab="autoreply">Auto-Reply</button>
+            </div>
           </div>
 
           <div class="calc-body" data-panel="members" id="calcMembers">
@@ -201,28 +209,22 @@
           </div>
 
           <div class="calc-body hidden" data-panel="spam" id="calcSpam">
-            <label for="spamQty">Number of licenses</label>
-            <input type="number" id="spamQty" min="1" step="1" value="1" />
-            <div class="calc-breakdown">
-              <span>Rate</span>
-              <span>$6.50 / month</span>
-            </div>
-            <div class="calc-total">
-              <span>Monthly total</span>
-              <span id="spamTotal">$6.50</span>
+            <div class="calc-fixed">
+              <p class="calc-fixed-label">Fixed price — 1 license per order</p>
+              <div class="calc-total calc-total-fixed">
+                <span>Monthly total</span>
+                <span id="spamTotal">$6.50</span>
+              </div>
             </div>
           </div>
 
           <div class="calc-body hidden" data-panel="autoreply" id="calcAutoreply">
-            <label for="autoreplyQty">Number of accounts</label>
-            <input type="number" id="autoreplyQty" min="1" step="1" value="1" />
-            <div class="calc-breakdown">
-              <span>Rate</span>
-              <span>$4.00 / account / month</span>
-            </div>
-            <div class="calc-total">
-              <span>Monthly total</span>
-              <span id="autoreplyTotal">$4.00</span>
+            <div class="calc-fixed">
+              <p class="calc-fixed-label">Fixed price — 1 account per order</p>
+              <div class="calc-total calc-total-fixed">
+                <span>Monthly total</span>
+                <span id="autoreplyTotal">$4.00</span>
+              </div>
             </div>
           </div>
 
@@ -339,6 +341,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>

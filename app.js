@@ -1,8 +1,8 @@
 const PRODUCTS = {
   members: { rate: 0.03, min: 100, totalEl: 'memberTotal', inputId: 'memberQty', minMsg: 'No — minimum order is 100 members.' },
   vc: { rate: 0.50, min: 1, totalEl: 'vcTotal', inputId: 'vcQty', minMsg: 'Enter at least 1 VC bot.' },
-  spam: { rate: 6.50, min: 1, totalEl: 'spamTotal', inputId: 'spamQty', minMsg: 'Enter at least 1 license.' },
-  autoreply: { rate: 4.00, min: 1, totalEl: 'autoreplyTotal', inputId: 'autoreplyQty', minMsg: 'Enter at least 1 auto-reply account.' },
+  spam: { rate: 6.50, fixed: true, totalEl: 'spamTotal' },
+  autoreply: { rate: 4.00, fixed: true, totalEl: 'autoreplyTotal' },
 };
 
 const calcTabs = document.querySelectorAll('.calc-tab');
@@ -27,8 +27,14 @@ function formatUSD(amount) {
 
 function updateProductTotal(productKey) {
   const product = PRODUCTS[productKey];
-  const input = document.getElementById(product.inputId);
   const totalEl = document.getElementById(product.totalEl);
+
+  if (product.fixed) {
+    totalEl.textContent = formatUSD(product.rate);
+    return;
+  }
+
+  const input = document.getElementById(product.inputId);
   const raw = input.value.trim();
 
   if (raw === '') {
@@ -62,7 +68,10 @@ document.querySelectorAll('[data-product]').forEach((btn) => {
 });
 
 Object.keys(PRODUCTS).forEach((key) => {
-  document.getElementById(PRODUCTS[key].inputId).addEventListener('input', () => updateProductTotal(key));
+  const product = PRODUCTS[key];
+  if (!product.fixed) {
+    document.getElementById(product.inputId).addEventListener('input', () => updateProductTotal(key));
+  }
 });
 
 function showToast(message) {
@@ -207,12 +216,17 @@ checkoutBtn.addEventListener('click', async () => {
   }
 
   const product = PRODUCTS[activeTab];
-  const raw = document.getElementById(product.inputId).value.trim();
-  const qty = parseInt(raw, 10);
+  let qty;
 
-  if (!raw || isNaN(qty) || qty < product.min) {
-    showToast(product.minMsg);
-    return;
+  if (product.fixed) {
+    qty = 1;
+  } else {
+    const raw = document.getElementById(product.inputId).value.trim();
+    qty = parseInt(raw, 10);
+    if (!raw || isNaN(qty) || qty < product.min) {
+      showToast(product.minMsg);
+      return;
+    }
   }
 
   checkoutBtn.disabled = true;
