@@ -17,6 +17,9 @@ const toast = document.getElementById('toast');
 const checkoutOverlay = document.getElementById('checkoutOverlay');
 const checkoutClose = document.getElementById('checkoutClose');
 const checkoutDone = document.getElementById('checkoutDone');
+const settingsOverlay = document.getElementById('settingsOverlay');
+const settingsClose = document.getElementById('settingsClose');
+const settingsSignOut = document.getElementById('settingsSignOut');
 const payTabs = document.querySelectorAll('.pay-tab');
 const payEthPanel = document.getElementById('payEth');
 const payBtcPanel = document.getElementById('payBtc');
@@ -98,7 +101,7 @@ function renderLoginButton() {
       ${currentUser.username}
     `;
     loginBtn.onclick = () => {
-      window.location.href = '/settings.html';
+      openSettings();
     };
   } else {
     loginBtn.innerHTML = `
@@ -159,13 +162,47 @@ function openCheckout(order) {
   checkoutOverlay.classList.remove('hidden');
   requestAnimationFrame(() => checkoutOverlay.classList.add('is-open'));
   checkoutOverlay.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('checkout-open');
+  document.body.classList.add('modal-open');
+}
+
+function openSettings() {
+  if (!currentUser) {
+    window.location.href = '/auth/discord';
+    return;
+  }
+
+  const name = currentUser.username || 'User';
+  const handle = `@${name.toLowerCase().replace(/\s+/g, '')}`;
+  const email = currentUser.email || 'Not shared';
+
+  document.getElementById('settingsAvatar').src = currentUser.avatarUrl;
+  document.getElementById('settingsAvatar').alt = name;
+  document.getElementById('settingsUsername').textContent = name;
+  document.getElementById('settingsHandle').textContent = handle;
+  document.getElementById('settingsDiscordId').textContent = currentUser.id || '—';
+  document.getElementById('settingsEmail').textContent = email;
+
+  settingsOverlay.classList.remove('hidden');
+  requestAnimationFrame(() => settingsOverlay.classList.add('is-open'));
+  settingsOverlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeSettings() {
+  settingsOverlay.classList.remove('is-open');
+  settingsOverlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+  setTimeout(() => {
+    if (!settingsOverlay.classList.contains('is-open')) {
+      settingsOverlay.classList.add('hidden');
+    }
+  }, 280);
 }
 
 function closeCheckout() {
   checkoutOverlay.classList.remove('is-open');
   checkoutOverlay.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('checkout-open');
+  document.body.classList.remove('modal-open');
   currentOrder = null;
   setTimeout(() => {
     if (!checkoutOverlay.classList.contains('is-open')) {
@@ -187,7 +224,7 @@ payTabs.forEach((tab) => {
   });
 });
 
-document.querySelectorAll('.copy-btn').forEach((btn) => {
+document.querySelectorAll('.copy-btn, .settings-copy-btn').forEach((btn) => {
   btn.addEventListener('click', async () => {
     const el = document.getElementById(btn.dataset.copy);
     if (!el) return;
@@ -211,10 +248,17 @@ checkoutClose.addEventListener('click', closeCheckout);
 checkoutOverlay.addEventListener('click', (e) => {
   if (e.target === checkoutOverlay) closeCheckout();
 });
+settingsClose.addEventListener('click', closeSettings);
+settingsOverlay.addEventListener('click', (e) => {
+  if (e.target === settingsOverlay) closeSettings();
+});
+settingsSignOut.addEventListener('click', () => {
+  window.location.href = '/auth/logout';
+});
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && checkoutOverlay.classList.contains('is-open')) {
-    closeCheckout();
-  }
+  if (e.key !== 'Escape') return;
+  if (checkoutOverlay.classList.contains('is-open')) closeCheckout();
+  if (settingsOverlay.classList.contains('is-open')) closeSettings();
 });
 checkoutDone.addEventListener('click', () => {
   showToast(`Order ${currentOrder?.id} marked as paid. We’ll confirm shortly.`);
