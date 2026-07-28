@@ -1,3 +1,6 @@
+const DISCORD_COMMUNITY_INVITE = 'https://discord.gg/Nw7P2zPvCV';
+const INVITE_PATTERN = /^https?:\/\/(discord\.(gg|com)\/|discordapp\.com\/invite\/)/i;
+
 const PRODUCTS = {
   members: { rate: 0.03, min: 100, totalEl: 'memberTotal', inputId: 'memberQty', minMsg: 'No — minimum order is 100 members.' },
   vc: { rate: 0.50, min: 1, totalEl: 'vcTotal', inputId: 'vcQty', minMsg: 'Enter at least 1 VC bot.' },
@@ -16,6 +19,8 @@ const checkoutDone = document.getElementById('checkoutDone');
 const payTabs = document.querySelectorAll('.pay-tab');
 const payEthPanel = document.getElementById('payEth');
 const payBtcPanel = document.getElementById('payBtc');
+const serverInviteInput = document.getElementById('serverInvite');
+const pasteInviteBtn = document.getElementById('pasteInviteBtn');
 
 let activeTab = 'members';
 let currentUser = null;
@@ -88,9 +93,7 @@ function renderLoginButton() {
       ${currentUser.username}
     `;
     loginBtn.onclick = () => {
-      if (confirm('Log out of MioMembers?')) {
-        window.location.href = '/auth/logout';
-      }
+      window.location.href = '/settings.html';
     };
   } else {
     loginBtn.innerHTML = `
@@ -124,6 +127,10 @@ function openCheckout(order) {
     <div class="checkout-summary-item">
       <span>Product</span>
       <strong>${order.qty.toLocaleString()} × ${order.productLabel}</strong>
+    </div>
+    <div class="checkout-summary-item">
+      <span>Server invite</span>
+      <strong>${order.invite}</strong>
     </div>
     <div class="checkout-summary-item checkout-summary-total">
       <span>Total due</span>
@@ -229,6 +236,13 @@ checkoutBtn.addEventListener('click', async () => {
     }
   }
 
+  const invite = serverInviteInput?.value?.trim() || '';
+  if (!invite || !INVITE_PATTERN.test(invite)) {
+    showToast('Enter a valid Discord invite link (discord.gg/...).');
+    serverInviteInput?.focus();
+    return;
+  }
+
   checkoutBtn.disabled = true;
   checkoutBtn.textContent = 'Creating order...';
 
@@ -236,7 +250,7 @@ checkoutBtn.addEventListener('click', async () => {
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product: activeTab, qty }),
+      body: JSON.stringify({ product: activeTab, qty, invite }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -263,4 +277,23 @@ if (params.get('login') === 'success') {
 }
 
 Object.keys(PRODUCTS).forEach(updateProductTotal);
+
+document.querySelectorAll('[data-discord-invite]').forEach((link) => {
+  link.href = DISCORD_COMMUNITY_INVITE;
+});
+
+pasteInviteBtn?.addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text?.trim()) {
+      showToast('Clipboard is empty.');
+      return;
+    }
+    serverInviteInput.value = text.trim();
+    showToast('Invite pasted.');
+  } catch {
+    showToast('Could not read clipboard.');
+  }
+});
+
 loadSession();
