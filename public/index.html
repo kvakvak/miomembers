@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=9" />
+  <link rel="stylesheet" href="styles.css?v=10" />
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -155,9 +155,6 @@
             </div>
           </div>
 
-          <label for="serverInvite">Discord server invite</label>
-          <input type="url" id="serverInvite" placeholder="https://discord.gg/your-server" />
-
           <button class="btn btn-primary btn-full" id="checkoutBtn">Proceed to checkout</button>
           <p class="calc-hint">Pay with ETH or BTC. Log in with Discord first.</p>
         </div>
@@ -178,7 +175,7 @@
         <div class="step">
           <div class="step-num">2</div>
           <h3>Choose your product</h3>
-          <p>Pick members or VC bots and enter your server invite link.</p>
+          <p>Pick members or VC bots and choose your quantity.</p>
         </div>
         <div class="step">
           <div class="step-num">3</div>
@@ -208,38 +205,69 @@
   <div class="toast hidden" id="toast"></div>
 
   <div class="checkout-overlay hidden" id="checkoutOverlay" aria-hidden="true">
-    <div class="checkout-modal" role="dialog" aria-labelledby="checkoutTitle">
-      <button class="checkout-close" id="checkoutClose" type="button" aria-label="Close">&times;</button>
-      <h2 id="checkoutTitle">Complete payment</h2>
-      <p class="checkout-order-id">Order <strong id="checkoutOrderId"></strong></p>
+    <div class="checkout-sheet" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+      <div class="checkout-sheet-glow" aria-hidden="true"></div>
+      <header class="checkout-sheet-head">
+        <div>
+          <p class="checkout-kicker">Secure checkout</p>
+          <h2 id="checkoutTitle">Complete your order</h2>
+        </div>
+        <button class="checkout-close" id="checkoutClose" type="button" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="checkout-meta">
+        <span class="checkout-pill">Order <strong id="checkoutOrderId"></strong></span>
+        <span class="checkout-pill checkout-pill-muted" id="checkoutExpires">Expires in 60 min</span>
+      </div>
+
       <div class="checkout-summary" id="checkoutSummary"></div>
-      <div class="pay-tabs">
-        <button class="pay-tab active" type="button" data-currency="eth">Ethereum</button>
-        <button class="pay-tab" type="button" data-currency="btc">Bitcoin</button>
+
+      <div class="pay-switch" role="tablist" aria-label="Payment method">
+        <button class="pay-tab active" type="button" role="tab" aria-selected="true" data-currency="eth">
+          <span class="pay-dot eth"></span>
+          Ethereum
+        </button>
+        <button class="pay-tab" type="button" role="tab" aria-selected="false" data-currency="btc">
+          <span class="pay-dot btc"></span>
+          Bitcoin
+        </button>
       </div>
-      <div class="pay-panel" id="payEth">
+
+      <div class="pay-panel" id="payEth" role="tabpanel">
         <p class="pay-label">Send exactly</p>
-        <div class="pay-amount" id="payEthAmount"></div>
-        <p class="pay-label">To this ETH address</p>
-        <div class="pay-address-row">
+        <div class="pay-amount-row">
+          <div class="pay-amount" id="payEthAmount"></div>
+          <button class="copy-chip copy-btn" type="button" data-copy="payEthAmount">Copy</button>
+        </div>
+        <p class="pay-label">Network address</p>
+        <div class="pay-address">
           <code id="payEthAddress"></code>
-          <button class="btn btn-ghost btn-sm copy-btn" type="button" data-copy="payEthAddress">Copy</button>
+          <button class="copy-chip copy-btn" type="button" data-copy="payEthAddress">Copy</button>
         </div>
       </div>
-      <div class="pay-panel hidden" id="payBtc">
+
+      <div class="pay-panel hidden" id="payBtc" role="tabpanel">
         <p class="pay-label">Send exactly</p>
-        <div class="pay-amount" id="payBtcAmount"></div>
-        <p class="pay-label">To this BTC address</p>
-        <div class="pay-address-row">
+        <div class="pay-amount-row">
+          <div class="pay-amount" id="payBtcAmount"></div>
+          <button class="copy-chip copy-btn" type="button" data-copy="payBtcAmount">Copy</button>
+        </div>
+        <p class="pay-label">Network address</p>
+        <div class="pay-address">
           <code id="payBtcAddress"></code>
-          <button class="btn btn-ghost btn-sm copy-btn" type="button" data-copy="payBtcAddress">Copy</button>
+          <button class="copy-chip copy-btn" type="button" data-copy="payBtcAddress">Copy</button>
         </div>
       </div>
-      <p class="checkout-note">Send within 1 hour. Delivery starts after 1 confirmation.</p>
-      <button class="btn btn-primary btn-full" type="button" id="checkoutDone">I sent payment</button>
+
+      <p class="checkout-note">Send the exact amount within 1 hour. Delivery starts after confirmation.</p>
+      <button class="btn btn-primary btn-full checkout-done" type="button" id="checkoutDone">I’ve sent the payment</button>
     </div>
   </div>
 
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

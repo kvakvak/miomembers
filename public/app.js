@@ -5,7 +5,6 @@ const memberQtyInput = document.getElementById('memberQty');
 const vcQtyInput = document.getElementById('vcQty');
 const memberTotalEl = document.getElementById('memberTotal');
 const vcTotalEl = document.getElementById('vcTotal');
-const serverInviteInput = document.getElementById('serverInvite');
 const calcTabs = document.querySelectorAll('.calc-tab');
 const calcMembers = document.getElementById('calcMembers');
 const calcVc = document.getElementById('calcVc');
@@ -121,27 +120,53 @@ function openCheckout(order) {
   currentOrder = order;
   document.getElementById('checkoutOrderId').textContent = order.id;
   document.getElementById('checkoutSummary').innerHTML = `
-    <div><span>Product</span><strong>${order.qty} x ${order.productLabel}</strong></div>
-    <div><span>Total</span><strong>${formatUSD(order.totalUsd)}</strong></div>
-    <div><span>Server</span><strong>${order.invite}</strong></div>
+    <div class="checkout-summary-item">
+      <span>Product</span>
+      <strong>${order.qty.toLocaleString()} × ${order.productLabel}</strong>
+    </div>
+    <div class="checkout-summary-item checkout-summary-total">
+      <span>Total due</span>
+      <strong>${formatUSD(order.totalUsd)}</strong>
+    </div>
   `;
   document.getElementById('payEthAmount').textContent = `${order.payment.eth.amount} ETH`;
   document.getElementById('payEthAddress').textContent = order.payment.eth.address;
   document.getElementById('payBtcAmount').textContent = `${order.payment.btc.amount} BTC`;
   document.getElementById('payBtcAddress').textContent = order.payment.btc.address;
+
+  payTabs.forEach((t) => {
+    const isEth = t.dataset.currency === 'eth';
+    t.classList.toggle('active', isEth);
+    t.setAttribute('aria-selected', String(isEth));
+  });
+  payEthPanel.classList.remove('hidden');
+  payBtcPanel.classList.add('hidden');
+
   checkoutOverlay.classList.remove('hidden');
+  requestAnimationFrame(() => checkoutOverlay.classList.add('is-open'));
   checkoutOverlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('checkout-open');
 }
 
 function closeCheckout() {
-  checkoutOverlay.classList.add('hidden');
+  checkoutOverlay.classList.remove('is-open');
   checkoutOverlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('checkout-open');
   currentOrder = null;
+  setTimeout(() => {
+    if (!checkoutOverlay.classList.contains('is-open')) {
+      checkoutOverlay.classList.add('hidden');
+    }
+  }, 280);
 }
 
 payTabs.forEach((tab) => {
   tab.addEventListener('click', () => {
-    payTabs.forEach((t) => t.classList.toggle('active', t === tab));
+    payTabs.forEach((t) => {
+      const active = t === tab;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', String(active));
+    });
     const isEth = tab.dataset.currency === 'eth';
     payEthPanel.classList.toggle('hidden', !isEth);
     payBtcPanel.classList.toggle('hidden', isEth);
@@ -149,9 +174,22 @@ payTabs.forEach((tab) => {
 });
 
 document.querySelectorAll('.copy-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     const el = document.getElementById(btn.dataset.copy);
-    navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied!'));
+    if (!el) return;
+    try {
+      await navigator.clipboard.writeText(el.textContent.trim());
+      const prev = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.classList.add('copied');
+      showToast('Copied to clipboard');
+      setTimeout(() => {
+        btn.textContent = prev;
+        btn.classList.remove('copied');
+      }, 1400);
+    } catch {
+      showToast('Could not copy');
+    }
   });
 });
 
@@ -159,8 +197,13 @@ checkoutClose.addEventListener('click', closeCheckout);
 checkoutOverlay.addEventListener('click', (e) => {
   if (e.target === checkoutOverlay) closeCheckout();
 });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && checkoutOverlay.classList.contains('is-open')) {
+    closeCheckout();
+  }
+});
 checkoutDone.addEventListener('click', () => {
-  showToast(`Order ${currentOrder?.id} submitted. We will confirm after payment.`);
+  showToast(`Order ${currentOrder?.id} marked as paid. We’ll confirm shortly.`);
   closeCheckout();
 });
 
@@ -188,13 +231,6 @@ checkoutBtn.addEventListener('click', async () => {
     }
   }
 
-  const invite = serverInviteInput?.value?.trim() || '';
-  if (!invite) {
-    showToast('Enter your Discord server invite link.');
-    serverInviteInput?.focus();
-    return;
-  }
-
   checkoutBtn.disabled = true;
   checkoutBtn.textContent = 'Creating order...';
 
@@ -202,7 +238,7 @@ checkoutBtn.addEventListener('click', async () => {
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product: activeTab, qty, invite }),
+      body: JSON.stringify({ product: activeTab, qty }),
     });
     const data = await res.json();
     if (!res.ok) {

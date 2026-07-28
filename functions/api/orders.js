@@ -18,7 +18,7 @@ export async function onRequest({ env, request }) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { product, qty, invite } = body;
+  const { product, qty } = body;
   if (!['members', 'vc'].includes(product)) {
     return Response.json({ error: 'Invalid product' }, { status: 400 });
   }
@@ -31,11 +31,6 @@ export async function onRequest({ env, request }) {
     return Response.json({ error: 'Minimum order is 100 members' }, { status: 400 });
   }
 
-  const inviteTrimmed = (invite || '').trim();
-  if (!inviteTrimmed || !/^https?:\/\/(discord\.(gg|com)\/|discordapp\.com\/invite\/)/i.test(inviteTrimmed)) {
-    return Response.json({ error: 'Valid Discord invite link required' }, { status: 400 });
-  }
-
   const totalUsd = calcTotal(product, quantity);
   if (totalUsd === null) {
     return Response.json({ error: 'Invalid product' }, { status: 400 });
@@ -43,7 +38,7 @@ export async function onRequest({ env, request }) {
 
   try {
     const prices = await fetchCryptoPrices(env);
-    const order = buildOrder({ user, product, qty: quantity, totalUsd, invite: inviteTrimmed, prices, env });
+    const order = buildOrder({ user, product, qty: quantity, totalUsd, prices, env });
 
     if (env.ORDERS) {
       await env.ORDERS.put(order.id, JSON.stringify(order), { expirationTtl: 86400 });

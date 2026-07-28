@@ -79,7 +79,7 @@ export function makeOrderId() {
   return `MM-${n.toString(36).toUpperCase().padStart(6, '0')}`;
 }
 
-export function buildOrder({ user, product, qty, totalUsd, invite, prices, env }) {
+export function buildOrder({ user, product, qty, totalUsd, prices, env }) {
   const ethAddress = env.ETH_ADDRESS || '0x288B865bdF8eb9DC76518C72D5C87D090126685a';
   const btcAddress = env.BTC_ADDRESS || 'bc1qwdq6qe6vg4vk2s0txg0qwq2vwge4x6yt9hx86n';
 
@@ -92,7 +92,6 @@ export function buildOrder({ user, product, qty, totalUsd, invite, prices, env }
     productLabel: product === 'members' ? 'Discord Members' : 'VC AFK Bots',
     qty,
     totalUsd: +totalUsd.toFixed(2),
-    invite,
     discordId: user.id,
     username: user.username,
     createdAt: new Date().toISOString(),
@@ -119,7 +118,6 @@ export async function notifyDiscord(order, env) {
           { name: 'User', value: `${order.username} (${order.discordId})`, inline: true },
           { name: 'Product', value: `${order.qty} x ${order.productLabel}`, inline: true },
           { name: 'Total', value: `$${order.totalUsd.toFixed(2)}`, inline: true },
-          { name: 'Invite', value: order.invite },
           { name: 'ETH', value: `${order.payment.eth.amount} ETH`, inline: true },
           { name: 'BTC', value: `${order.payment.btc.amount} BTC`, inline: true },
         ],
