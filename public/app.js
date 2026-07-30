@@ -20,6 +20,15 @@ const checkoutDone = document.getElementById('checkoutDone');
 const settingsOverlay = document.getElementById('settingsOverlay');
 const settingsClose = document.getElementById('settingsClose');
 const settingsSignOut = document.getElementById('settingsSignOut');
+const settingsTabs = document.querySelectorAll('[data-settings-tab]');
+const settingsPanels = document.querySelectorAll('[data-settings-panel]');
+const settingsAutoreplyTab = document.getElementById('settingsAutoreplyTab');
+const autoreplyStatusPill = document.getElementById('autoreplyStatusPill');
+const autoreplyPrompt = document.getElementById('autoreplyPrompt');
+const autoreplyDiscordToken = document.getElementById('autoreplyDiscordToken');
+const autoreplyGroqKey = document.getElementById('autoreplyGroqKey');
+const autoreplyActive = document.getElementById('autoreplyActive');
+const autoreplySaveBtn = document.getElementById('autoreplySaveBtn');
 const payTabs = document.querySelectorAll('.pay-tab');
 const payEthPanel = document.getElementById('payEth');
 const payBtcPanel = document.getElementById('payBtc');
@@ -165,6 +174,113 @@ function openCheckout(order) {
   document.body.classList.add('modal-open');
 }
 
+let autoreplyState = null;
+
+function switchSettingsTab(tabKey) {
+  settingsTabs.forEach((tab) => {
+    const active = tab.dataset.settingsTab === tabKey;
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-selected', String(active));
+  });
+  settingsPanels.forEach((panel) => {
+    panel.classList.toggle('hidden', panel.dataset.settingsPanel !== tabKey);
+  });
+}
+
+settingsTabs.forEach((tab) => {
+  tab.addEventListener('click', () => switchSettingsTab(tab.dataset.settingsTab));
+});
+
+function renderAutoreplyStatus(state) {
+  if (!autoreplyStatusPill) return;
+  if (!state?.configured) {
+    autoreplyStatusPill.textContent = 'Not configured';
+    autoreplyStatusPill.classList.remove('active');
+    return;
+  }
+  if (state.active) {
+    autoreplyStatusPill.textContent = 'Active';
+    autoreplyStatusPill.classList.add('active');
+  } else {
+    autoreplyStatusPill.textContent = 'Paused';
+    autoreplyStatusPill.classList.remove('active');
+  }
+}
+
+async function loadAutoreplyStatus() {
+  try {
+    const res = await fetch('/api/autoreply/status');
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function populateAutoreplySettings() {
+  autoreplyState = await loadAutoreplyStatus();
+  const entitled = !!autoreplyState?.entitled;
+  settingsAutoreplyTab?.classList.toggle('hidden', !entitled);
+
+  if (!entitled) {
+    switchSettingsTab('account');
+    return;
+  }
+
+  if (autoreplyPrompt) autoreplyPrompt.value = autoreplyState.prompt || '';
+  if (autoreplyActive) autoreplyActive.checked = autoreplyState.active !== false;
+  if (autoreplyDiscordToken) {
+    autoreplyDiscordToken.placeholder = autoreplyState.hasDiscordToken
+      ? 'Saved — leave blank to keep current token'
+      : 'Your Discord user token';
+    autoreplyDiscordToken.value = '';
+  }
+  if (autoreplyGroqKey) {
+    autoreplyGroqKey.placeholder = autoreplyState.hasGroqApiKey
+      ? 'Saved — leave blank to keep current key'
+      : 'gsk_...';
+    autoreplyGroqKey.value = '';
+  }
+  renderAutoreplyStatus(autoreplyState);
+}
+
+async function saveAutoreplyConfig() {
+  if (!autoreplyPrompt?.value.trim()) {
+    showToast('Enter a prompt for the AI.');
+    autoreplyPrompt?.focus();
+    return;
+  }
+
+  autoreplySaveBtn.disabled = true;
+  autoreplySaveBtn.textContent = 'Saving...';
+
+  try {
+    const res = await fetch('/api/autoreply/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: autoreplyPrompt.value.trim(),
+        discordToken: autoreplyDiscordToken?.value.trim() || '',
+        groqApiKey: autoreplyGroqKey?.value.trim() || '',
+        active: autoreplyActive?.checked !== false,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data.error || 'Could not save auto-reply settings.');
+      return;
+    }
+    showToast('Auto-reply saved. DM your account from another user to test.');
+    await populateAutoreplySettings();
+    switchSettingsTab('autoreply');
+  } catch {
+    showToast('Network error. Try again.');
+  } finally {
+    autoreplySaveBtn.disabled = false;
+    autoreplySaveBtn.textContent = 'Save & start auto-reply';
+  }
+}
+
 function openSettings() {
   if (!currentUser) {
     window.location.href = '/auth/discord';
@@ -181,6 +297,9 @@ function openSettings() {
   document.getElementById('settingsHandle').textContent = handle;
   document.getElementById('settingsDiscordId').textContent = currentUser.id || '—';
   document.getElementById('settingsEmail').textContent = email;
+
+  switchSettingsTab('account');
+  populateAutoreplySettings();
 
   settingsOverlay.classList.remove('hidden');
   requestAnimationFrame(() => settingsOverlay.classList.add('is-open'));
@@ -255,6 +374,7 @@ settingsOverlay.addEventListener('click', (e) => {
 settingsSignOut.addEventListener('click', () => {
   window.location.href = '/auth/logout';
 });
+autoreplySaveBtn?.addEventListener('click', saveAutoreplyConfig);
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (checkoutOverlay.classList.contains('is-open')) closeCheckout();

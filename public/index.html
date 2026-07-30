@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=18" />
+  <link rel="stylesheet" href="styles.css?v=19" />
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -389,6 +389,12 @@
         </button>
       </header>
 
+      <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+        <button class="settings-tab active" type="button" role="tab" aria-selected="true" data-settings-tab="account">Account</button>
+        <button class="settings-tab hidden" type="button" role="tab" aria-selected="false" data-settings-tab="autoreply" id="settingsAutoreplyTab">Auto-Reply</button>
+      </div>
+
+      <div class="settings-panel" data-settings-panel="account">
       <div class="settings-profile">
         <img id="settingsAvatar" src="" alt="" width="56" height="56" />
         <div>
@@ -428,9 +434,38 @@
         </svg>
         Sign out
       </button>
+      </div>
+
+      <div class="settings-panel hidden" data-settings-panel="autoreply" id="settingsAutoreplyPanel">
+        <div class="settings-autoreply-head">
+          <div>
+            <strong>Discord Auto-Reply</strong>
+            <span>Connect your account token + free Groq Llama API. The bot replies to DMs using your prompt.</span>
+          </div>
+          <span class="settings-status-pill" id="autoreplyStatusPill">Not configured</span>
+        </div>
+
+        <label class="settings-input-label" for="autoreplyPrompt">AI prompt</label>
+        <textarea id="autoreplyPrompt" class="settings-textarea" rows="5" placeholder="You are a friendly assistant for my Discord server. Keep replies short and helpful."></textarea>
+
+        <label class="settings-input-label" for="autoreplyDiscordToken">Discord account token</label>
+        <input id="autoreplyDiscordToken" class="settings-input" type="password" autocomplete="off" placeholder="Your Discord user token" />
+
+        <label class="settings-input-label" for="autoreplyGroqKey">Groq API key <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">(free)</a></label>
+        <input id="autoreplyGroqKey" class="settings-input" type="password" autocomplete="off" placeholder="gsk_..." />
+
+        <label class="settings-check">
+          <input type="checkbox" id="autoreplyActive" checked />
+          <span>Auto-reply active</span>
+        </label>
+
+        <p class="settings-note">Test: DM your Discord account from another user. Replies use Groq Llama 3.1 8B.</p>
+
+        <button class="btn btn-primary btn-full" type="button" id="autoreplySaveBtn">Save &amp; start auto-reply</button>
+      </div>
     </div>
   </div>
 
-  <script src="app.js?v=18"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>

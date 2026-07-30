@@ -67,7 +67,7 @@ $staffRole = Invoke-Discord POST "$Base/guilds/$GuildId/roles" @{
 }
 
 $everyoneDenySend = @(
-  @{ id = $GuildId; type = 0; allow = "1024"; deny = "2048" }
+  @{ id = $GuildId; type = 0; allow = "66560"; deny = "51264" }
 )
 
 $staffOnly = @(

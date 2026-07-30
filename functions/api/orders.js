@@ -1,5 +1,6 @@
 import { verifySession } from '../lib/session.js';
 import { calcTotal, fetchCryptoPrices, buildOrder, notifyDiscord, PRODUCT_MIN_QTY, PRODUCT_MAX_QTY } from '../lib/orders.js';
+import { grantEntitlement } from '../lib/autoreply.js';
 
 export async function onRequest({ env, request }) {
   if (request.method !== 'POST') {
@@ -56,6 +57,12 @@ export async function onRequest({ env, request }) {
 
     if (env.ORDERS) {
       await env.ORDERS.put(order.id, JSON.stringify(order), { expirationTtl: 86400 });
+    }
+
+    const autoreplyStore = env.AUTOREPLY || env.ORDERS;
+    if (product === 'autoreply' && autoreplyStore) {
+      await grantEntitlement(user.id, autoreplyStore, { orderId: order.id, source: 'order' });
+      await autoreplyStore.put(`order:${order.id}`, JSON.stringify(order));
     }
 
     await notifyDiscord(order, env);
