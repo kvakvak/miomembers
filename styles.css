@@ -377,13 +377,13 @@ body {
 }
 
 .nitro-icon {
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
+  background: rgba(255, 115, 250, 0.15);
+  color: #ff73fa;
 }
 
 .boosts-icon {
-  background: rgba(244, 114, 182, 0.15);
-  color: #f472b6;
+  background: rgba(244, 127, 255, 0.15);
+  color: #f47fff;
 }
 
 .product-card h3 {
