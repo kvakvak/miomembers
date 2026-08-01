@@ -1,32 +1,50 @@
 const MEMBER_RATE = 0.03;
 const VC_BOT_RATE = 0.5;
-const SPAM_RATE = 6.5;
-const AUTOREPLY_RATE = 4.0;
+const NITRO_RATE = 4.0;
+
+export const BOOST_TIERS = {
+  1: 2.99,
+  2: 4.99,
+  3: 6.49,
+  4: 7.49,
+  5: 8.29,
+  6: 8.99,
+  7: 9.49,
+  8: 9.89,
+  9: 10.19,
+  10: 10.49,
+  11: 10.69,
+  12: 10.89,
+  13: 11.09,
+  14: 11.29,
+  15: 11.49,
+  16: 12.0,
+};
 
 const PRODUCT_LABELS = {
   members: 'Discord Members',
   vc: 'VC AFK Bots',
-  spam: 'Discord Spam',
-  autoreply: 'Discord Auto-Reply',
+  nitro: 'Discord Nitro',
+  boosts: 'Discord Server Boosts',
 };
 
 export const PRODUCT_MIN_QTY = {
   members: 100,
   vc: 1,
-  spam: 1,
-  autoreply: 1,
+  nitro: 1,
+  boosts: 1,
 };
 
 export const PRODUCT_MAX_QTY = {
-  spam: 1,
-  autoreply: 1,
+  nitro: 1,
+  boosts: 16,
 };
 
 export function calcTotal(product, qty) {
   if (product === 'members') return qty * MEMBER_RATE;
   if (product === 'vc') return qty * VC_BOT_RATE;
-  if (product === 'spam') return qty * SPAM_RATE;
-  if (product === 'autoreply') return qty * AUTOREPLY_RATE;
+  if (product === 'nitro') return NITRO_RATE;
+  if (product === 'boosts') return BOOST_TIERS[qty] ?? null;
   return null;
 }
 

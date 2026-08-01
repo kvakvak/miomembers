@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=19" />
+  <link rel="stylesheet" href="styles.css?v=20" />
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -77,7 +77,7 @@
     <section id="products" class="section container">
       <div class="section-header">
         <h2>What we offer</h2>
-        <p>Four products built for Discord server owners and communities.</p>
+        <p>Four products built for Discord server owners and communities — members, VC bots, Nitro, and boosts.</p>
       </div>
       <div class="product-rows">
         <div class="product-row">
@@ -125,40 +125,37 @@
 
         <div class="product-row">
           <article class="product-card">
-          <div class="product-icon spam-icon">
+          <div class="product-icon nitro-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="9" y1="9" x2="15" y2="9"/>
-              <line x1="9" y1="13" x2="13" y2="13"/>
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
           </div>
-          <h3>Discord Spam</h3>
-          <p class="product-price">$6.50 <span>/ lifetime</span></p>
+          <h3>Discord Nitro</h3>
+          <p class="product-price">$4.00 <span>/ month</span></p>
           <ul class="feature-list">
-            <li>Mass DM or channel messaging</li>
-            <li>Custom message templates</li>
-            <li>One license per purchase</li>
-            <li>Lifetime access — no renewals</li>
+            <li>Full Nitro perks on your account</li>
+            <li>Custom emoji &amp; stickers anywhere</li>
+            <li>HD streaming &amp; larger uploads</li>
+            <li>Delivered after payment confirmation</li>
           </ul>
-          <a href="#order" class="btn btn-outline" data-product="spam">Order spam</a>
+          <a href="#order" class="btn btn-outline" data-product="nitro">Get Nitro</a>
         </article>
 
         <article class="product-card">
-          <div class="product-icon autoreply-icon">
+          <div class="product-icon boosts-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 14 4 9 9 4"/>
-              <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
           </div>
-          <h3>Discord Auto-Reply</h3>
-          <p class="product-price">$4.00 <span>/ lifetime</span></p>
+          <h3>Discord Server Boosts</h3>
+          <p class="product-price">$12 <span>/ 16 boosts</span></p>
           <ul class="feature-list">
-            <li>Instant DM auto-responses</li>
-            <li>Keyword triggers &amp; filters</li>
-            <li>One account per purchase</li>
-            <li>Lifetime access — no renewals</li>
+            <li>Level up your Discord server</li>
+            <li>1–16 boosts per order</li>
+            <li>Bulk discount — 16 boosts for $12</li>
+            <li>Applied to your server invite</li>
           </ul>
-          <a href="#order" class="btn btn-outline" data-product="autoreply">Get auto-reply</a>
+          <a href="#order" class="btn btn-outline" data-product="boosts">Order boosts</a>
           </article>
         </div>
       </div>
@@ -177,10 +174,10 @@
               <strong>VC Bots:</strong> Billed monthly. Bot joins your server after payment.
             </div>
             <div class="note">
-              <strong>Discord Spam:</strong> $6.50 lifetime — one license per order.
+              <strong>Discord Nitro:</strong> $4.00 — one subscription per order.
             </div>
             <div class="note">
-              <strong>Auto-Reply:</strong> $4.00 lifetime — one account per order.
+              <strong>Server Boosts:</strong> 1–16 boosts. Best value: 16 boosts for $12.00.
             </div>
           </div>
         </div>
@@ -191,8 +188,8 @@
               <button class="calc-tab" data-tab="vc">VC Bots</button>
             </div>
             <div class="calc-tabs calc-tabs-pair">
-              <button class="calc-tab" data-tab="spam">Spam</button>
-              <button class="calc-tab" data-tab="autoreply">Auto-Reply</button>
+              <button class="calc-tab" data-tab="nitro">Nitro</button>
+              <button class="calc-tab" data-tab="boosts">Boosts</button>
             </div>
           </div>
 
@@ -222,23 +219,26 @@
             </div>
           </div>
 
-          <div class="calc-body hidden" data-panel="spam" id="calcSpam">
+          <div class="calc-body hidden" data-panel="nitro" id="calcNitro">
             <div class="calc-fixed">
-              <p class="calc-fixed-label">Lifetime access — 1 license per order</p>
+              <p class="calc-fixed-label">Discord Nitro — 1 subscription per order</p>
               <div class="calc-total calc-total-fixed">
                 <span>Total</span>
-                <span id="spamTotal">$6.50</span>
+                <span id="nitroTotal">$4.00</span>
               </div>
             </div>
           </div>
 
-          <div class="calc-body hidden" data-panel="autoreply" id="calcAutoreply">
-            <div class="calc-fixed">
-              <p class="calc-fixed-label">Lifetime access — 1 account per order</p>
-              <div class="calc-total calc-total-fixed">
-                <span>Total</span>
-                <span id="autoreplyTotal">$4.00</span>
-              </div>
+          <div class="calc-body hidden" data-panel="boosts" id="calcBoosts">
+            <label for="boostsQty">Number of boosts</label>
+            <input type="number" id="boostsQty" min="1" max="16" step="1" value="16" />
+            <div class="calc-breakdown">
+              <span>Rate</span>
+              <span id="boostsRate">16 boosts — $12.00</span>
+            </div>
+            <div class="calc-total">
+              <span>Total</span>
+              <span id="boostsTotal">$12.00</span>
             </div>
           </div>
 
@@ -389,12 +389,7 @@
         </button>
       </header>
 
-      <div class="settings-tabs" role="tablist" aria-label="Settings sections">
-        <button class="settings-tab active" type="button" role="tab" aria-selected="true" data-settings-tab="account">Account</button>
-        <button class="settings-tab hidden" type="button" role="tab" aria-selected="false" data-settings-tab="autoreply" id="settingsAutoreplyTab">Auto-Reply</button>
-      </div>
-
-      <div class="settings-panel" data-settings-panel="account">
+      <div class="settings-panel">
       <div class="settings-profile">
         <img id="settingsAvatar" src="" alt="" width="56" height="56" />
         <div>
@@ -435,37 +430,9 @@
         Sign out
       </button>
       </div>
-
-      <div class="settings-panel hidden" data-settings-panel="autoreply" id="settingsAutoreplyPanel">
-        <div class="settings-autoreply-head">
-          <div>
-            <strong>Discord Auto-Reply</strong>
-            <span>Connect your account token + free Groq Llama API. The bot replies to DMs using your prompt.</span>
-          </div>
-          <span class="settings-status-pill" id="autoreplyStatusPill">Not configured</span>
-        </div>
-
-        <label class="settings-input-label" for="autoreplyPrompt">AI prompt</label>
-        <textarea id="autoreplyPrompt" class="settings-textarea" rows="5" placeholder="You are a friendly assistant for my Discord server. Keep replies short and helpful."></textarea>
-
-        <label class="settings-input-label" for="autoreplyDiscordToken">Discord account token</label>
-        <input id="autoreplyDiscordToken" class="settings-input" type="password" autocomplete="off" placeholder="Your Discord user token" />
-
-        <label class="settings-input-label" for="autoreplyGroqKey">Groq API key <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">(free)</a></label>
-        <input id="autoreplyGroqKey" class="settings-input" type="password" autocomplete="off" placeholder="gsk_..." />
-
-        <label class="settings-check">
-          <input type="checkbox" id="autoreplyActive" checked />
-          <span>Auto-reply active</span>
-        </label>
-
-        <p class="settings-note">Test: DM your Discord account from another user. Replies use Groq Llama 3.1 8B.</p>
-
-        <button class="btn btn-primary btn-full" type="button" id="autoreplySaveBtn">Save &amp; start auto-reply</button>
-      </div>
     </div>
   </div>
 
-  <script src="app.js?v=19"></script>
+  <script src="app.js?v=20"></script>
 </body>
 </html>

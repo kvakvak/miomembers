@@ -376,14 +376,14 @@ body {
   color: var(--discord);
 }
 
-.spam-icon {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+.nitro-icon {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
 }
 
-.autoreply-icon {
-  background: rgba(34, 197, 94, 0.15);
-  color: var(--success);
+.boosts-icon {
+  background: rgba(244, 114, 182, 0.15);
+  color: #f472b6;
 }
 
 .product-card h3 {
@@ -1610,27 +1610,6 @@ body.modal-open {
   display: none;
 }
 
-.settings-autoreply-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.settings-autoreply-head strong {
-  display: block;
-  font-size: 0.95rem;
-  margin-bottom: 0.2rem;
-}
-
-.settings-autoreply-head span {
-  display: block;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  line-height: 1.45;
-}
-
 .settings-status-pill {
   flex-shrink: 0;
   padding: 0.3rem 0.65rem;
@@ -1696,6 +1675,10 @@ body.modal-open {
   color: var(--text-muted);
   line-height: 1.45;
   margin: 0.65rem 0 1rem;
+}
+
+.settings-note.hidden {
+  display: none;
 }
 
 @media (max-width: 480px) {

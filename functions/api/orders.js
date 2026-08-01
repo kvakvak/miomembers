@@ -1,6 +1,5 @@
 import { verifySession } from '../lib/session.js';
 import { calcTotal, fetchCryptoPrices, buildOrder, notifyDiscord, PRODUCT_MIN_QTY, PRODUCT_MAX_QTY } from '../lib/orders.js';
-import { grantEntitlement } from '../lib/autoreply.js';
 
 export async function onRequest({ env, request }) {
   if (request.method !== 'POST') {
@@ -20,7 +19,7 @@ export async function onRequest({ env, request }) {
   }
 
   const { product, qty, invite } = body;
-  if (!['members', 'vc', 'spam', 'autoreply'].includes(product)) {
+  if (!['members', 'vc', 'nitro', 'boosts'].includes(product)) {
     return Response.json({ error: 'Invalid product' }, { status: 400 });
   }
 
@@ -31,24 +30,27 @@ export async function onRequest({ env, request }) {
 
   const minQty = PRODUCT_MIN_QTY[product];
   if (quantity < minQty) {
-    const unit = product === 'members' ? 'members' : product === 'spam' ? 'licenses' : product === 'autoreply' ? 'accounts' : 'items';
+    const unit = product === 'members' ? 'members' : product === 'boosts' ? 'boosts' : 'items';
     return Response.json({ error: `Minimum order is ${minQty} ${unit}` }, { status: 400 });
   }
 
   const maxQty = PRODUCT_MAX_QTY[product];
   if (maxQty && quantity > maxQty) {
-    return Response.json({ error: 'Only 1 can be purchased per order' }, { status: 400 });
+    const msg = product === 'boosts'
+      ? 'Maximum 16 boosts per order'
+      : 'Only 1 can be purchased per order';
+    return Response.json({ error: msg }, { status: 400 });
   }
 
   const inviteTrimmed = (invite || '').trim();
-  const needsInvite = product === 'members' || product === 'vc';
+  const needsInvite = product === 'members' || product === 'vc' || product === 'boosts';
   if (needsInvite && (!inviteTrimmed || !/^https?:\/\/(discord\.(gg|com)\/|discordapp\.com\/invite\/)/i.test(inviteTrimmed))) {
     return Response.json({ error: 'Valid Discord invite link required' }, { status: 400 });
   }
 
   const totalUsd = calcTotal(product, quantity);
   if (totalUsd === null) {
-    return Response.json({ error: 'Invalid product' }, { status: 400 });
+    return Response.json({ error: 'Invalid product or quantity' }, { status: 400 });
   }
 
   try {
@@ -57,12 +59,6 @@ export async function onRequest({ env, request }) {
 
     if (env.ORDERS) {
       await env.ORDERS.put(order.id, JSON.stringify(order), { expirationTtl: 86400 });
-    }
-
-    const autoreplyStore = env.AUTOREPLY || env.ORDERS;
-    if (product === 'autoreply' && autoreplyStore) {
-      await grantEntitlement(user.id, autoreplyStore, { orderId: order.id, source: 'order' });
-      await autoreplyStore.put(`order:${order.id}`, JSON.stringify(order));
     }
 
     await notifyDiscord(order, env);

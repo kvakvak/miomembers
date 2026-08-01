@@ -1,12 +1,31 @@
 const DISCORD_COMMUNITY_INVITE = 'https://discord.gg/Nw7P2zPvCV';
 const INVITE_PATTERN = /^https?:\/\/(discord\.(gg|com)\/|discordapp\.com\/invite\/)/i;
-const PRODUCTS_NEED_INVITE = new Set(['members', 'vc']);
+const PRODUCTS_NEED_INVITE = new Set(['members', 'vc', 'boosts']);
+
+const BOOST_TIERS = {
+  1: 2.99,
+  2: 4.99,
+  3: 6.49,
+  4: 7.49,
+  5: 8.29,
+  6: 8.99,
+  7: 9.49,
+  8: 9.89,
+  9: 10.19,
+  10: 10.49,
+  11: 10.69,
+  12: 10.89,
+  13: 11.09,
+  14: 11.29,
+  15: 11.49,
+  16: 12.00,
+};
 
 const PRODUCTS = {
   members: { rate: 0.03, min: 100, totalEl: 'memberTotal', inputId: 'memberQty', minMsg: 'No — minimum order is 100 members.' },
   vc: { rate: 0.50, min: 1, totalEl: 'vcTotal', inputId: 'vcQty', minMsg: 'Enter at least 1 VC bot.' },
-  spam: { rate: 6.50, fixed: true, totalEl: 'spamTotal' },
-  autoreply: { rate: 4.00, fixed: true, totalEl: 'autoreplyTotal' },
+  nitro: { rate: 4.00, fixed: true, totalEl: 'nitroTotal' },
+  boosts: { tiered: true, min: 1, max: 16, totalEl: 'boostsTotal', inputId: 'boostsQty', rateEl: 'boostsRate', minMsg: 'Enter 1–16 boosts.' },
 };
 
 const calcTabs = document.querySelectorAll('.calc-tab');
@@ -20,15 +39,6 @@ const checkoutDone = document.getElementById('checkoutDone');
 const settingsOverlay = document.getElementById('settingsOverlay');
 const settingsClose = document.getElementById('settingsClose');
 const settingsSignOut = document.getElementById('settingsSignOut');
-const settingsTabs = document.querySelectorAll('[data-settings-tab]');
-const settingsPanels = document.querySelectorAll('[data-settings-panel]');
-const settingsAutoreplyTab = document.getElementById('settingsAutoreplyTab');
-const autoreplyStatusPill = document.getElementById('autoreplyStatusPill');
-const autoreplyPrompt = document.getElementById('autoreplyPrompt');
-const autoreplyDiscordToken = document.getElementById('autoreplyDiscordToken');
-const autoreplyGroqKey = document.getElementById('autoreplyGroqKey');
-const autoreplyActive = document.getElementById('autoreplyActive');
-const autoreplySaveBtn = document.getElementById('autoreplySaveBtn');
 const payTabs = document.querySelectorAll('.pay-tab');
 const payEthPanel = document.getElementById('payEth');
 const payBtcPanel = document.getElementById('payBtc');
@@ -42,6 +52,10 @@ let currentOrder = null;
 
 function formatUSD(amount) {
   return `$${amount.toFixed(2)}`;
+}
+
+function calcBoostTotal(qty) {
+  return BOOST_TIERS[qty] ?? null;
 }
 
 function updateProductTotal(productKey) {
@@ -58,12 +72,29 @@ function updateProductTotal(productKey) {
 
   if (raw === '') {
     totalEl.textContent = '$0.00';
+    if (product.rateEl) {
+      document.getElementById(product.rateEl).textContent = '—';
+    }
     return;
   }
 
   const qty = parseInt(raw, 10);
   if (isNaN(qty) || qty < 0) {
     totalEl.textContent = '$0.00';
+    if (product.rateEl) {
+      document.getElementById(product.rateEl).textContent = '—';
+    }
+    return;
+  }
+
+  if (product.tiered) {
+    const price = calcBoostTotal(qty);
+    totalEl.textContent = price != null ? formatUSD(price) : '$0.00';
+    if (product.rateEl) {
+      document.getElementById(product.rateEl).textContent = price != null
+        ? `${qty} boost${qty === 1 ? '' : 's'} — ${formatUSD(price)}`
+        : 'Enter 1–16 boosts';
+    }
     return;
   }
 
@@ -174,113 +205,6 @@ function openCheckout(order) {
   document.body.classList.add('modal-open');
 }
 
-let autoreplyState = null;
-
-function switchSettingsTab(tabKey) {
-  settingsTabs.forEach((tab) => {
-    const active = tab.dataset.settingsTab === tabKey;
-    tab.classList.toggle('active', active);
-    tab.setAttribute('aria-selected', String(active));
-  });
-  settingsPanels.forEach((panel) => {
-    panel.classList.toggle('hidden', panel.dataset.settingsPanel !== tabKey);
-  });
-}
-
-settingsTabs.forEach((tab) => {
-  tab.addEventListener('click', () => switchSettingsTab(tab.dataset.settingsTab));
-});
-
-function renderAutoreplyStatus(state) {
-  if (!autoreplyStatusPill) return;
-  if (!state?.configured) {
-    autoreplyStatusPill.textContent = 'Not configured';
-    autoreplyStatusPill.classList.remove('active');
-    return;
-  }
-  if (state.active) {
-    autoreplyStatusPill.textContent = 'Active';
-    autoreplyStatusPill.classList.add('active');
-  } else {
-    autoreplyStatusPill.textContent = 'Paused';
-    autoreplyStatusPill.classList.remove('active');
-  }
-}
-
-async function loadAutoreplyStatus() {
-  try {
-    const res = await fetch('/api/autoreply/status');
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
-
-async function populateAutoreplySettings() {
-  autoreplyState = await loadAutoreplyStatus();
-  const entitled = !!autoreplyState?.entitled;
-  settingsAutoreplyTab?.classList.toggle('hidden', !entitled);
-
-  if (!entitled) {
-    switchSettingsTab('account');
-    return;
-  }
-
-  if (autoreplyPrompt) autoreplyPrompt.value = autoreplyState.prompt || '';
-  if (autoreplyActive) autoreplyActive.checked = autoreplyState.active !== false;
-  if (autoreplyDiscordToken) {
-    autoreplyDiscordToken.placeholder = autoreplyState.hasDiscordToken
-      ? 'Saved — leave blank to keep current token'
-      : 'Your Discord user token';
-    autoreplyDiscordToken.value = '';
-  }
-  if (autoreplyGroqKey) {
-    autoreplyGroqKey.placeholder = autoreplyState.hasGroqApiKey
-      ? 'Saved — leave blank to keep current key'
-      : 'gsk_...';
-    autoreplyGroqKey.value = '';
-  }
-  renderAutoreplyStatus(autoreplyState);
-}
-
-async function saveAutoreplyConfig() {
-  if (!autoreplyPrompt?.value.trim()) {
-    showToast('Enter a prompt for the AI.');
-    autoreplyPrompt?.focus();
-    return;
-  }
-
-  autoreplySaveBtn.disabled = true;
-  autoreplySaveBtn.textContent = 'Saving...';
-
-  try {
-    const res = await fetch('/api/autoreply/config', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt: autoreplyPrompt.value.trim(),
-        discordToken: autoreplyDiscordToken?.value.trim() || '',
-        groqApiKey: autoreplyGroqKey?.value.trim() || '',
-        active: autoreplyActive?.checked !== false,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      showToast(data.error || 'Could not save auto-reply settings.');
-      return;
-    }
-    showToast('Auto-reply saved. DM your account from another user to test.');
-    await populateAutoreplySettings();
-    switchSettingsTab('autoreply');
-  } catch {
-    showToast('Network error. Try again.');
-  } finally {
-    autoreplySaveBtn.disabled = false;
-    autoreplySaveBtn.textContent = 'Save & start auto-reply';
-  }
-}
-
 function openSettings() {
   if (!currentUser) {
     window.location.href = '/auth/discord';
@@ -297,9 +221,6 @@ function openSettings() {
   document.getElementById('settingsHandle').textContent = handle;
   document.getElementById('settingsDiscordId').textContent = currentUser.id || '—';
   document.getElementById('settingsEmail').textContent = email;
-
-  switchSettingsTab('account');
-  populateAutoreplySettings();
 
   settingsOverlay.classList.remove('hidden');
   requestAnimationFrame(() => settingsOverlay.classList.add('is-open'));
@@ -374,7 +295,6 @@ settingsOverlay.addEventListener('click', (e) => {
 settingsSignOut.addEventListener('click', () => {
   window.location.href = '/auth/logout';
 });
-autoreplySaveBtn?.addEventListener('click', saveAutoreplyConfig);
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (checkoutOverlay.classList.contains('is-open')) closeCheckout();
@@ -397,6 +317,13 @@ checkoutBtn.addEventListener('click', async () => {
 
   if (product.fixed) {
     qty = 1;
+  } else if (product.tiered) {
+    const raw = document.getElementById(product.inputId).value.trim();
+    qty = parseInt(raw, 10);
+    if (!raw || isNaN(qty) || qty < product.min || qty > product.max || calcBoostTotal(qty) === null) {
+      showToast(product.minMsg);
+      return;
+    }
   } else {
     const raw = document.getElementById(product.inputId).value.trim();
     qty = parseInt(raw, 10);

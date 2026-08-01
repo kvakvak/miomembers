@@ -18,9 +18,11 @@ const PORT = process.env.PORT || 3000;
 const {
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
-  DISCORD_REDIRECT_URI = `http://localhost:${PORT}/auth/discord/callback`,
   SESSION_SECRET = 'dev-session-secret-change-me',
 } = process.env;
+
+// Local dev always uses localhost callback — .env may have the production URL for Cloudflare.
+const DISCORD_REDIRECT_URI = `http://localhost:${PORT}/auth/discord/callback`;
 
 const sessions = new Map();
 const autoreplyStore = createAutoreplyStore();
@@ -63,7 +65,10 @@ app.get('/auth/discord/callback', async (req, res) => {
       body: tokenParams,
     });
 
-    if (!tokenRes.ok) return res.redirect('/?login=failed');
+    if (!tokenRes.ok) {
+      console.error('Token exchange failed:', await tokenRes.text());
+      return res.redirect('/?login=failed');
+    }
 
     const { access_token } = await tokenRes.json();
     const userRes = await fetch('https://discord.com/api/users/@me', {
@@ -137,6 +142,7 @@ async function autoreplyStatusHandler(req, res) {
   const config = await getPublicConfig(user.id, autoreplyStore);
   res.json({
     entitled: true,
+    storageReady: true,
     configured: !!config?.configured,
     active: !!config?.active,
     prompt: config?.prompt || '',
@@ -184,17 +190,9 @@ app.post('/api/orders', async (req, res) => {
   if (!session) return res.status(401).json({ error: 'Not logged in' });
 
   const { product, qty, invite } = req.body || {};
-  if (product === 'autoreply') {
-    await grantEntitlement(session.discordId, autoreplyStore, { source: 'order' });
-    await autoreplyStore.put(`order:test-${session.discordId}`, JSON.stringify({
-      discordId: session.discordId,
-      product: 'autoreply',
-      username: session.username,
-    }));
-  }
 
   res.status(501).json({
-    error: 'Local orders checkout is limited. Use production site for crypto checkout, or test Auto-Reply as hrawww.',
+    error: 'Local orders checkout is limited. Use the production site for crypto checkout.',
   });
 });
 
@@ -205,5 +203,6 @@ app.get('/auth/logout', (req, res) => {
 
 app.listen(PORT, async () => {
   console.log(`MioMembers running at http://localhost:${PORT}`);
+  console.log(`Discord OAuth callback: ${DISCORD_REDIRECT_URI}`);
   await autoreplyRunner.startAll();
 });
